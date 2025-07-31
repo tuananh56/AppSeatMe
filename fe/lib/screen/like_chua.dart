@@ -40,6 +40,28 @@ class _LikePageState extends State<LikePage> {
     }
   }
 
+  Future<void> removeFavorite(String branchId, int index) async {
+    try {
+      final response = await http.delete(
+        Uri.parse(
+          'http://192.168.126.138:5000/api/favorites/${widget.userId}/$branchId',
+        ),
+      );
+      if (response.statusCode == 200) {
+        setState(() {
+          likedBranches.removeAt(index); // ✅ Xoá chính xác phần tử theo index
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Đã xoá khỏi danh sách yêu thích')),
+        );
+      } else {
+        print('❌ Xoá thất bại: ${response.body}');
+      }
+    } catch (e) {
+      print('❌ Lỗi xoá yêu thích: $e');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -47,7 +69,12 @@ class _LikePageState extends State<LikePage> {
         children: [
           // Header with back button and title
           Container(
-            padding: const EdgeInsets.only(top: 40, left: 8, right: 16, bottom: 16),
+            padding: const EdgeInsets.only(
+              top: 40,
+              left: 8,
+              right: 16,
+              bottom: 16,
+            ),
             width: double.infinity,
             decoration: const BoxDecoration(
               gradient: LinearGradient(
@@ -83,7 +110,8 @@ class _LikePageState extends State<LikePage> {
                     itemBuilder: (context, index) {
                       final branch = likedBranches[index];
                       final imageName = branch['image'];
-                      final hasImage = imageName != null && imageName.toString().isNotEmpty;
+                      final hasImage =
+                          imageName != null && imageName.toString().isNotEmpty;
 
                       final imageAssetPath = hasImage
                           ? 'assets/imgChiNhanh/$imageName'
@@ -94,23 +122,26 @@ class _LikePageState extends State<LikePage> {
                         width: 100,
                         height: 100,
                         fit: BoxFit.cover,
-                        errorBuilder: (context, error, stackTrace) => Image.asset(
-                          'assets/imgChiNhanh/default_image.png',
-                          width: 100,
-                          height: 100,
-                          fit: BoxFit.cover,
-                        ),
+                        errorBuilder: (context, error, stackTrace) =>
+                            Image.asset(
+                              'assets/imgChiNhanh/default_image.png',
+                              width: 100,
+                              height: 100,
+                              fit: BoxFit.cover,
+                            ),
                       );
 
                       return InkWell(
                         onTap: () {
                           Navigator.push(
                             context,
-                            MaterialPageRoute(
+                            MaterialPageRoute( /*đây*/ 
                               builder: (context) => DetailChiNhanhPage(
+                                id: branch['_id'],
                                 imagePath: imageAssetPath,
                                 name: branch['name'] ?? 'Không rõ tên',
-                                address: branch['address'] ?? 'Không có địa chỉ',
+                                address:
+                                    branch['address'] ?? 'Không có địa chỉ',
                               ),
                             ),
                           );
@@ -141,10 +172,13 @@ class _LikePageState extends State<LikePage> {
                               const SizedBox(width: 12),
                               Expanded(
                                 child: Padding(
-                                  padding: const EdgeInsets.symmetric(vertical: 8),
+                                  padding: const EdgeInsets.symmetric(
+                                    vertical: 8,
+                                  ),
                                   child: Column(
                                     mainAxisAlignment: MainAxisAlignment.center,
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
                                       Text(
                                         branch['name'] ?? 'Không rõ tên',
@@ -172,6 +206,40 @@ class _LikePageState extends State<LikePage> {
                                     ],
                                   ),
                                 ),
+                              ),
+                              IconButton(
+                                icon: const Icon(
+                                  Icons.delete,
+                                  color: Colors.grey,
+                                ),
+                                onPressed: () {
+                                  showDialog(
+                                    context: context,
+                                    builder: (context) => AlertDialog(
+                                      title: const Text('Xoá yêu thích'),
+                                      content: const Text(
+                                        'Bạn có chắc chắn muốn xoá chi nhánh này khỏi danh sách yêu thích?',
+                                      ),
+                                      actions: [
+                                        TextButton(
+                                          child: const Text('Huỷ'),
+                                          onPressed: () =>
+                                              Navigator.pop(context),
+                                        ),
+                                        TextButton(
+                                          child: const Text('Xoá'),
+                                          onPressed: () {
+                                            Navigator.pop(context);
+                                            removeFavorite(
+                                              branch['_id'],
+                                              index,
+                                            ); // ✅ thêm index ở đây
+                                          },
+                                        ),
+                                      ],
+                                    ),
+                                  );
+                                },
                               ),
                             ],
                           ),

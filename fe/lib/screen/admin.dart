@@ -44,25 +44,26 @@ class _AdminPageState extends State<AdminPage> {
     );
 
     try {
-      final response =
-          await (isConfirmed ? http.post(url) : http.put(url));
+      final response = await (isConfirmed ? http.post(url) : http.put(url));
 
       if (response.statusCode == 200) {
         await _fetchBookings();
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(isConfirmed ? '✅ Đã xác nhận đơn' : '❌ Đã hủy đơn')),
+          SnackBar(
+            content: Text(isConfirmed ? '✅ Đã xác nhận đơn' : '❌ Đã hủy đơn'),
+          ),
         );
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Lỗi cập nhật xác nhận: ${response.statusCode}')),
+          SnackBar(
+            content: Text('Lỗi cập nhật xác nhận: ${response.statusCode}'),
+          ),
         );
       }
     } catch (e) {
       print('❌ _updateXacNhan error: $e');
     }
   }
-
-  
 
   Future<void> _fetchBookings() async {
     final url = Uri.parse('http://192.168.126.138:5000/api/bookings');
@@ -79,6 +80,27 @@ class _AdminPageState extends State<AdminPage> {
       }
     } catch (e) {
       print('❌ Lỗi kết nối: $e');
+    }
+  }
+
+  Future<void> _updateThanhToan(String id) async {
+    final url = Uri.parse('http://192.168.126.138:5000/api/bookings/$id/pay');
+
+    try {
+      final response = await http.post(url);
+
+      if (response.statusCode == 200) {
+        await _fetchBookings();
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Đã xác nhận thanh toán')),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Lỗi thanh toán: ${response.statusCode}')),
+        );
+      }
+    } catch (e) {
+      print('❌ _updateThanhToan error: $e');
     }
   }
 
@@ -110,7 +132,7 @@ class _AdminPageState extends State<AdminPage> {
     return Scaffold(
       backgroundColor: Colors.grey[100],
       appBar: AppBar(
-        title: const Text("Đơn đặt bàn"),
+        title: null,
         backgroundColor: const Color.fromARGB(255, 236, 24, 24),
         actions: [
           Padding(
@@ -133,14 +155,15 @@ class _AdminPageState extends State<AdminPage> {
                   },
                   items: <String>['Tất cả', 'Chưa thanh toán', 'Đã thanh toán']
                       .map<DropdownMenuItem<String>>((String value) {
-                    return DropdownMenuItem<String>(
-                      value: value,
-                      child: Text(
-                        value,
-                        style: const TextStyle(color: Colors.black),
-                      ),
-                    );
-                  }).toList(),
+                        return DropdownMenuItem<String>(
+                          value: value,
+                          child: Text(
+                            value,
+                            style: const TextStyle(color: Colors.black),
+                          ),
+                        );
+                      })
+                      .toList(),
                 ),
               ),
             ),
@@ -153,31 +176,49 @@ class _AdminPageState extends State<AdminPage> {
             ? const Center(child: Text('Không có đơn đặt bàn nào'))
             : Column(
                 children: [
+                  // Tiêu đề mới thay cho AppBar.title
+                  const Padding(
+                    padding: EdgeInsets.all(16.0),
+                    child: Text(
+                      "Đơn đặt bàn",
+                      style: TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
                   Expanded(
                     child: ListView.builder(
                       itemCount: _paginatedBookings.length,
                       itemBuilder: (context, index) {
                         final b = _paginatedBookings[index];
                         final date = b['date'] != null
-                            ? DateFormat('dd/MM/yyyy')
-                                .format(DateTime.parse(b['date']))
+                            ? DateFormat(
+                                'dd/MM/yyyy',
+                              ).format(DateTime.parse(b['date']))
                             : 'Không rõ';
 
                         return Card(
                           shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12)),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
                           margin: const EdgeInsets.symmetric(
-                              horizontal: 12, vertical: 6),
+                            horizontal: 12,
+                            vertical: 6,
+                          ),
                           elevation: 4,
                           child: Padding(
                             padding: const EdgeInsets.all(12.0),
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text('${b['name'] ?? 'Ẩn danh'} - ${b['phone'] ?? ''}',
-                                    style: const TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 16)),
+                                Text(
+                                  '${b['name'] ?? 'Ẩn danh'} - ${b['phone'] ?? ''}',
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 16,
+                                  ),
+                                ),
                                 const SizedBox(height: 4),
                                 Text('Chi nhánh: ${b['chiNhanh'] ?? ''}'),
                                 Text('Địa chỉ: ${b['diaChi'] ?? ''}'),
@@ -187,15 +228,19 @@ class _AdminPageState extends State<AdminPage> {
                                   Text('Ghi chú: ${b['note']}'),
                                 const SizedBox(height: 10),
                                 Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
                                   children: [
                                     Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
                                       children: [
                                         Text(
                                           b['trangThaiThanhToan'] ?? '',
                                           style: TextStyle(
-                                            color: b['trangThaiThanhToan'] == 'Đã thanh toán'
+                                            color:
+                                                b['trangThaiThanhToan'] ==
+                                                    'Đã thanh toán'
                                                 ? Colors.green
                                                 : Colors.red,
                                             fontWeight: FontWeight.bold,
@@ -214,24 +259,47 @@ class _AdminPageState extends State<AdminPage> {
                                     Row(
                                       children: [
                                         IconButton(
-                                          icon: const Icon(Icons.check_circle, color: Colors.green),
+                                          icon: const Icon(
+                                            Icons.check_circle,
+                                            color: Colors.green,
+                                          ),
                                           tooltip: 'Xác nhận',
-                                          onPressed: () => _updateXacNhan(b['_id'], true),
+                                          onPressed: () =>
+                                              _updateXacNhan(b['_id'], true),
                                         ),
                                         IconButton(
-                                          icon: const Icon(Icons.cancel, color: Colors.orange),
+                                          icon: const Icon(
+                                            Icons.cancel,
+                                            color: Colors.orange,
+                                          ),
                                           tooltip: 'Hủy',
-                                          onPressed: () => _updateXacNhan(b['_id'], false),
+                                          onPressed: () =>
+                                              _updateXacNhan(b['_id'], false),
                                         ),
                                         IconButton(
-                                          icon: const Icon(Icons.phone, color: Colors.blue),
+                                          icon: const Icon(
+                                            Icons
+                                                .payments, // hoặc Icons.check_circle nếu bạn thích
+                                            color: Colors.purple,
+                                          ),
+                                          tooltip: 'Xác nhận thanh toán',
+                                          onPressed: () =>
+                                              _updateThanhToan(b['_id']),
+                                        ),
+
+                                        IconButton(
+                                          icon: const Icon(
+                                            Icons.phone,
+                                            color: Colors.blue,
+                                          ),
                                           tooltip: 'Liên hệ',
-                                          onPressed: () => _callPhone(b['phone']),
+                                          onPressed: () =>
+                                              _callPhone(b['phone']),
                                         ),
                                       ],
                                     ),
                                   ],
-                                )
+                                ),
                               ],
                             ),
                           ),

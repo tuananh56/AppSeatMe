@@ -59,9 +59,9 @@ router.get('/:userId', async (req, res) => {
   }
 });
 
-// ✅ [DELETE] Xoá chi nhánh khỏi danh sách yêu thích
-router.delete('/', async (req, res) => {
-  const { userId, branchId } = req.body;
+// ✅ [DELETE] Xoá chi nhánh khỏi danh sách yêu thích qua URL params
+router.delete('/:userId/:branchId', async (req, res) => {
+  const { userId, branchId } = req.params;
 
   if (!userId || !branchId) {
     return res.status(400).json({ message: 'Thiếu userId hoặc branchId' });
@@ -79,6 +79,7 @@ router.delete('/', async (req, res) => {
     res.status(500).json({ message: 'Lỗi server khi xoá yêu thích', error: error.message });
   }
 });
+
 
 // ✅ [GET] Kiểm tra 1 chi nhánh đã được yêu thích chưa
 // Ví dụ: /api/favorites/check?userId=xxx&branchId=yyy

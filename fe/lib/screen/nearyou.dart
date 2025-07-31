@@ -150,8 +150,9 @@ class _NearYouPageState extends State<NearYouPage> {
           onTap: () {
             Navigator.push(
               context,
-              MaterialPageRoute(
+              MaterialPageRoute(/*đây */
                 builder: (context) => DetailChiNhanhPage(
+                  id: branch['_id'],
                   imagePath: 'assets/imgChiNhanh/${branch['image']}',
                   name: branch['name'],
                   address: branch['address'],

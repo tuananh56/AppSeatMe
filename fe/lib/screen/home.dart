@@ -226,16 +226,18 @@ class _HomeContentState extends State<HomeContent> {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) =>
-                        const AllChiNhanhPage(initialTabIndex: 0), // ✔ chỉ hiển thị chi nhánh
+                    builder: (context) => const AllChiNhanhPage(
+                      initialTabIndex: 0,
+                    ), // ✔ chỉ hiển thị chi nhánh
                   ),
                 );
               } else if (title.toLowerCase().contains('ưu đãi')) {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) =>
-                        const AllChiNhanhPage(initialTabIndex: 1), // ✔ sang ưu đãi riêng
+                    builder: (context) => const AllChiNhanhPage(
+                      initialTabIndex: 1,
+                    ), // ✔ sang ưu đãi riêng
                   ),
                 );
               }
@@ -265,25 +267,24 @@ class _HomeContentState extends State<HomeContent> {
         itemBuilder: (context, index) {
           final branch = _branches[index];
           return _buildBranchCard(
-            branch['image'] ?? '',
-            branch['name'] ?? '',
-            branch['address'] ?? '',
+            branch
           );
         },
       ),
     );
   }
 
-  Widget _buildBranchCard(String imageFileName, String name, String address) {
+  Widget _buildBranchCard(Map<String, dynamic> branch) {
     return InkWell(
       onTap: () {
         Navigator.push(
           context,
           MaterialPageRoute(
             builder: (context) => DetailChiNhanhPage(
-              imagePath: 'assets/imgChiNhanh/$imageFileName',
-              name: name,
-              address: address,
+              id: branch['_id'],
+              imagePath: 'assets/imgChiNhanh/${branch['image']}',
+              name: branch['name'],
+              address: branch['address'],
             ),
           ),
         );
@@ -297,7 +298,7 @@ class _HomeContentState extends State<HomeContent> {
             ClipRRect(
               borderRadius: BorderRadius.circular(8.0),
               child: Image.asset(
-                'assets/imgChiNhanh/$imageFileName',
+                'assets/imgChiNhanh/${branch['image']}',
                 height: 120,
                 width: double.infinity,
                 fit: BoxFit.cover,
@@ -307,14 +308,14 @@ class _HomeContentState extends State<HomeContent> {
             ),
             const SizedBox(height: 8),
             Text(
-              name,
+              branch['name'],
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 4),
             Text(
-              address,
+              branch['address'],
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
               style: const TextStyle(fontSize: 12, color: Colors.grey),

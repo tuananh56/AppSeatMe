@@ -104,10 +104,6 @@ class _BookingHistoryPageState extends State<BookingHistoryPage> {
         ),
         actions: [
           TextButton(
-            child: const Text("Gọi"),
-            onPressed: () => _launchPhoneDialer(phone),
-          ),
-          TextButton(
             child: const Text("Đóng"),
             onPressed: () => Navigator.pop(context),
           ),

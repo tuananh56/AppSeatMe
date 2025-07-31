@@ -146,6 +146,7 @@ class _AllChiNhanhPageState extends State<AllChiNhanhPage> with SingleTickerProv
                           context,
                           MaterialPageRoute(
                             builder: (context) => DetailChiNhanhPage(
+                              id: branch['_id'],
                               imagePath: 'assets/imgChiNhanh/${branch['image']}',
                               name: branch['name'] ?? '',
                               address: branch['address'] ?? '',

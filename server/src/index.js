@@ -35,7 +35,7 @@ app.use('/uploads', express.static(uploadPath));
 
 // Kết nối MongoDB
 mongoose.connect('mongodb://localhost:27017/app_dat_ban', {
- useNewUrlParser: true,
+useNewUrlParser: true,
 useUnifiedTopology: true,
 })
 .then(() => console.log("✅ Kết nối MongoDB thành công"))
@@ -58,7 +58,7 @@ app.use('/api/qrcode', qrCodeRoute);
 
 
 // Kiểm tra enum booking (nếu cần debug)
-console.log('🧪 Enum hiện tại:', Booking.schema.path('trangThaiXacNhan').enumValues);
+//console.log('🧪 Enum hiện tại:', Booking.schema.path('trangThaiXacNhan').enumValues);
 
 // Chạy server
 const PORT = 5000;

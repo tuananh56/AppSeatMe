@@ -24,12 +24,14 @@ class BranchService {
 }
 
 class DetailChiNhanhPage extends StatefulWidget {
+  final String id;
   final String imagePath;
   final String name;
   final String address;
 
   const DetailChiNhanhPage({
     super.key,
+    required this.id,
     required this.imagePath,
     required this.name,
     required this.address,
@@ -48,8 +50,15 @@ class _DetailChiNhanhPageState extends State<DetailChiNhanhPage> {
   @override
   void initState() {
     super.initState();
+    currentBranchId = widget.id; // ✅ gán từ widget.id
+    print('✅ [initState] currentBranchId = $currentBranchId');
     _checkIsLiked();
     _initData();
+  }
+
+  void _initPrefsAndCheck() async {
+    prefs = await SharedPreferences.getInstance();
+    _checkIsLiked();
   }
 
   Future<void> _initData() async {
@@ -357,6 +366,7 @@ class _DetailChiNhanhPageState extends State<DetailChiNhanhPage> {
                                       context,
                                       MaterialPageRoute(
                                         builder: (_) => DetailChiNhanhPage(
+                                          id: branch['_id'],
                                           imagePath:
                                               'assets/imgChiNhanh/${branch['image']}',
                                           name: branch['name'],

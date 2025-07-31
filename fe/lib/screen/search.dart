@@ -84,7 +84,9 @@ class _SearchPageState extends State<SearchPage> {
                       prefixIcon: const Icon(Icons.search),
                       fillColor: Colors.white,
                       filled: true,
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                      ),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(10),
                         borderSide: BorderSide.none,
@@ -100,26 +102,32 @@ class _SearchPageState extends State<SearchPage> {
             child: _isLoading
                 ? const Center(child: CircularProgressIndicator())
                 : _results.isEmpty
-                    ? const Center(child: Text('Không có kết quả'))
-                    : ListView.builder(
-                        padding: const EdgeInsets.all(16),
-                        itemCount: _results.length,
-                        itemBuilder: (context, index) {
-                          final branch = _results[index];
-                          return _buildBranchItem(
-                            branch['image'] ?? '',
-                            branch['name'] ?? '',
-                            branch['address'] ?? '',
-                          );
-                        },
-                      ),
+                ? const Center(child: Text('Không có kết quả'))
+                : ListView.builder(
+                    padding: const EdgeInsets.all(16),
+                    itemCount: _results.length,
+                    itemBuilder: (context, index) {
+                      final branch = _results[index];
+                      return _buildBranchItem(
+                        branch['_id'] ?? '',
+                        branch['image'] ?? '',
+                        branch['name'] ?? '',
+                        branch['address'] ?? '',
+                      );
+                    },
+                  ),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildBranchItem(String imageUrl, String name, String address) {
+  Widget _buildBranchItem(
+    String id,
+    String imageUrl,
+    String name,
+    String address,
+  ) {
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -130,6 +138,7 @@ class _SearchPageState extends State<SearchPage> {
             context,
             MaterialPageRoute(
               builder: (context) => DetailChiNhanhPage(
+                id: id,
                 imagePath: 'assets/imgChiNhanh/$imageUrl',
                 name: name,
                 address: address,
@@ -157,7 +166,8 @@ class _SearchPageState extends State<SearchPage> {
                 const SizedBox(width: 12),
                 Expanded(
                   child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center, // ✅ Căn giữa dọc
+                    mainAxisAlignment:
+                        MainAxisAlignment.center, // ✅ Căn giữa dọc
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(

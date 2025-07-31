@@ -48,7 +48,7 @@ router.get('/nearby', async (req, res) => {
       location: {
         $near: {
           $geometry: userLocation,
-          $maxDistance: 5000, // 5km
+          $maxDistance: 20000, // 5km
         },             
       },
     });
