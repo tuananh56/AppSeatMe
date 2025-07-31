@@ -66,6 +66,32 @@ class _AccountPageState extends State<AccountPage> {
     });
   }
 
+  void _showLoginRequiredDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Yêu cầu đăng nhập'),
+        content: const Text('Vui lòng đăng nhập để sử dụng chức năng này.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context), // Đóng dialog
+            child: const Text('Hủy'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pop(context); // Đóng dialog
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const LoginPage()),
+              ).then((_) => _loadUserFromPrefs()); // Tải lại sau khi đăng nhập
+            },
+            child: const Text('Đăng nhập'),
+          ),
+        ],
+      ),
+    );
+  }
+
   void _goToBookingHistory() {
     final user = _user;
     if (user != null && user['email'] != null) {
@@ -86,103 +112,128 @@ class _AccountPageState extends State<AccountPage> {
   }
 
   Widget _buildLoggedInView() {
-  return Scaffold(
-    backgroundColor: Colors.grey[100],
-    appBar: PreferredSize(
-  preferredSize: const Size.fromHeight(kToolbarHeight),
-  child: Container(
-    decoration: const BoxDecoration(
-      gradient: LinearGradient(
-        colors: [Color(0xFF6E0000), Color(0xFFFF2323)],
-      ),
-    ),
-    child: AppBar(
-      title: const Text("Tài khoản"),
-      backgroundColor: Colors.transparent, // transparent để lộ gradient
-      elevation: 0,
-      foregroundColor: Colors.white,
-    ),
-  ),
-),
-
-    body: SingleChildScrollView(
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        children: [
-          // Card thông tin người dùng
-          Card(
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(16),
-            ),
-            elevation: 4,
-            child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
-              child: Column(
-                children: [
-                  CircleAvatar(
-                    radius: 50,
-                    backgroundColor: Colors.grey[300],
-                    backgroundImage: (_userImage != null && _userImage!.isNotEmpty)
-                        ? NetworkImage("http://192.168.126.138:5000$_userImage")
-                        : null,
-                    child: (_userImage == null || _userImage!.isEmpty)
-                        ? const Icon(Icons.person, size: 50, color: Colors.white)
-                        : null,
-                  ),
-                  const SizedBox(height: 12),
-                  Text(
-                    _user!['name'] ?? 'Không có tên',
-                    style: const TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    _user!['email'] ?? 'Không có email',
-                    style: const TextStyle(color: Colors.grey),
-                  ),
-                ],
-              ),
+    return Scaffold(
+      backgroundColor: Colors.grey[100],
+      appBar: PreferredSize(
+        preferredSize: const Size.fromHeight(kToolbarHeight),
+        child: Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              colors: [Color(0xFF6E0000), Color(0xFFFF2323)],
             ),
           ),
-          const SizedBox(height: 20),
-
-          // Danh sách chức năng
-          _buildMenuTile(Icons.chat_bubble_outline, 'Trò chuyện với nhà hàng', () {
-            Navigator.push(context, MaterialPageRoute(builder: (_) => const QRPage()));
-          }),
-          _buildMenuTile(Icons.history, 'Lịch sử đặt bàn', _goToBookingHistory),
-          _buildMenuTile(Icons.edit, 'Chỉnh sửa thông tin', () {
-            if (_user != null) {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => EditProfilePage(user: _user!),
-                ),
-              ).then((_) {
-                _loadUserFromPrefs();
-              });
-            }
-          }),
-          _buildMenuTile(Icons.favorite_border, 'Yêu thích', () {
-            if (_user != null && _user!['_id'] != null) {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => LikePage(userId: _user!['_id']),
-                ),
-              );
-            }
-          }),
-          const Divider(height: 32),
-          _buildMenuTile(Icons.logout, 'Đăng xuất', _logout, iconColor: Colors.red),
-        ],
+          child: AppBar(
+            title: const Text("Tài khoản"),
+            backgroundColor: Colors.transparent, // transparent để lộ gradient
+            elevation: 0,
+            foregroundColor: Colors.white,
+          ),
+        ),
       ),
-    ),
-  );
-}
 
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          children: [
+            // Card thông tin người dùng
+            Card(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
+              elevation: 4,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  vertical: 24,
+                  horizontal: 16,
+                ),
+                child: Column(
+                  children: [
+                    CircleAvatar(
+                      radius: 50,
+                      backgroundColor: Colors.grey[300],
+                      backgroundImage:
+                          (_userImage != null && _userImage!.isNotEmpty)
+                          ? NetworkImage(
+                              "http://192.168.126.138:5000$_userImage",
+                            )
+                          : null,
+                      child: (_userImage == null || _userImage!.isEmpty)
+                          ? const Icon(
+                              Icons.person,
+                              size: 50,
+                              color: Colors.white,
+                            )
+                          : null,
+                    ),
+                    const SizedBox(height: 12),
+                    Text(
+                      _user!['name'] ?? 'Không có tên',
+                      style: const TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      _user!['email'] ?? 'Không có email',
+                      style: const TextStyle(color: Colors.grey),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 20),
+
+            // Danh sách chức năng
+            _buildMenuTile(
+              Icons.chat_bubble_outline,
+              'Trò chuyện với nhà hàng',
+              () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const QRPage()),
+                );
+              },
+            ),
+            _buildMenuTile(
+              Icons.history,
+              'Lịch sử đặt bàn',
+              _goToBookingHistory,
+            ),
+            _buildMenuTile(Icons.edit, 'Chỉnh sửa thông tin', () {
+              if (_user != null) {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => EditProfilePage(user: _user!),
+                  ),
+                ).then((_) {
+                  _loadUserFromPrefs();
+                });
+              }
+            }),
+            _buildMenuTile(Icons.favorite_border, 'Yêu thích', () {
+              if (_user != null && _user!['_id'] != null) {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => LikePage(userId: _user!['_id']),
+                  ),
+                );
+              }
+            }),
+            const Divider(height: 32),
+            _buildMenuTile(
+              Icons.logout,
+              'Đăng xuất',
+              _logout,
+              iconColor: Colors.red,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 
   Widget _buildLoginPrompt() {
     return Scaffold(
@@ -233,21 +284,58 @@ class _AccountPageState extends State<AccountPage> {
             padding: const EdgeInsets.symmetric(vertical: 16),
             child: Column(
               children: [
-                _buildMenuItem(
-                  Icons.person_outline,
-                  'Thông tin tài khoản',
-                  _goToLogin,
-                ),
-                _buildMenuItem(Icons.history, 'Lịch sử giao dịch', _goToLogin),
-                _buildMenuItem(Icons.favorite_border, 'Yêu thích', _goToLogin),
+                _buildMenuItem(Icons.person_outline, 'Thông tin tài khoản', () {
+                  if (_user == null) {
+                    _showLoginRequiredDialog();
+                  } else {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => EditProfilePage(
+                          user: _user!,
+                        ), // hoặc userId: _user!['_id']
+                      ),
+                    );
+                  }
+                }),
+                _buildMenuItem(Icons.history, 'Lịch sử giao dịch', () {
+                  if (_user == null) {
+                    _showLoginRequiredDialog();
+                  } else {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) =>
+                            BookingHistoryPage(userId: _user!['_id']),
+                      ),
+                    );
+                  }
+                }),
+                _buildMenuItem(Icons.favorite_border, 'Yêu thích', () {
+                  if (_user == null) {
+                    _showLoginRequiredDialog();
+                  } else {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => LikePage(userId: _user!['_id']),
+                      ),
+                    );
+                  }
+                }),
+
                 _buildMenuItem(
                   Icons.chat_bubble_outline,
                   'Trò chuyện với nhà hàng',
                   () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (_) => const QRPage()),
-                    );
+                    if (_user == null) {
+                      _showLoginRequiredDialog();
+                    } else {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (_) => const QRPage()),
+                      );
+                    }
                   },
                 ),
               ],
@@ -258,26 +346,31 @@ class _AccountPageState extends State<AccountPage> {
     );
   }
 
- Widget _buildMenuTile(IconData icon, String title, VoidCallback onTap, {Color? iconColor}) {
-  return Card(
-    margin: const EdgeInsets.symmetric(vertical: 6),
-    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-    child: ListTile(
-      leading: Icon(icon, color: iconColor ?? Colors.brown),
+  Widget _buildMenuTile(
+    IconData icon,
+    String title,
+    VoidCallback onTap, {
+    Color? iconColor,
+  }) {
+    return Card(
+      margin: const EdgeInsets.symmetric(vertical: 6),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      child: ListTile(
+        leading: Icon(icon, color: iconColor ?? Colors.brown),
+        title: Text(title),
+        trailing: const Icon(Icons.chevron_right),
+        onTap: onTap,
+      ),
+    );
+  }
+
+  Widget _buildMenuItem(IconData icon, String title, VoidCallback onTap) {
+    return ListTile(
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+      leading: Icon(icon, color: Colors.grey[600]),
       title: Text(title),
       trailing: const Icon(Icons.chevron_right),
       onTap: onTap,
-    ),
-  );
-}
-Widget _buildMenuItem(IconData icon, String title, VoidCallback onTap) {
-  return ListTile(
-    contentPadding: const EdgeInsets.symmetric(horizontal: 16),
-    leading: Icon(icon, color: Colors.grey[600]),
-    title: Text(title),
-    trailing: const Icon(Icons.chevron_right),
-    onTap: onTap,
-  );
-}
-
+    );
+  }
 }

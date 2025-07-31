@@ -68,7 +68,8 @@ class _OrderPageState extends State<OrderPage> {
       'phone': phoneController.text.trim(),
       'soGhe': soGhe,
       'date': selectedDate!.toIso8601String(),
-      'time': '${selectedTime!.hour}:${selectedTime!.minute.toString().padLeft(2, '0')}',
+      'time':
+          '${selectedTime!.hour}:${selectedTime!.minute.toString().padLeft(2, '0')}',
       'note': noteController.text.trim(),
       'chiNhanh': widget.name,
       'diaChi': widget.address,
@@ -104,9 +105,9 @@ class _OrderPageState extends State<OrderPage> {
           ),
         );
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Đặt bàn thất bại')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('Đặt bàn thất bại')));
       }
     } catch (_) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -170,7 +171,10 @@ class _OrderPageState extends State<OrderPage> {
             centerTitle: true,
             title: Text(
               'Đặt bàn tại ${widget.name}',
-              style: const TextStyle(fontWeight: FontWeight.w600, color: Colors.white),
+              style: const TextStyle(
+                fontWeight: FontWeight.w600,
+                color: Colors.white,
+              ),
             ),
             leading: IconButton(
               icon: const Icon(Icons.arrow_back, color: Colors.white),
@@ -199,8 +203,9 @@ class _OrderPageState extends State<OrderPage> {
                 controller: nameController,
                 decoration: const InputDecoration(
                   border: InputBorder.none,
-                  prefixIcon: Icon(Icons.person),
                   labelText: 'Tên khách hàng',
+
+                  suffixIcon: Icon(Icons.person, color: Colors.red),
                 ),
               ),
             ),
@@ -210,31 +215,54 @@ class _OrderPageState extends State<OrderPage> {
                 keyboardType: TextInputType.phone,
                 decoration: const InputDecoration(
                   border: InputBorder.none,
-                  prefixIcon: Icon(Icons.phone),
                   labelText: 'Số điện thoại',
+
+                  suffixIcon: Icon(Icons.phone, color: Colors.red),
                 ),
               ),
             ),
             customInputField(
               child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Icon(Icons.table_bar),
-                  const SizedBox(width: 10),
-                  const Text('Số bàn:'),
-                  IconButton(
-                    icon: const Icon(Icons.remove_circle_outline),
-                    onPressed: () => setState(() {
-                      if (soGhe > 1) soGhe--;
-                    }),
+                  // Nhóm: chữ "Số bàn" + - số +
+                  Row(
+                    children: [
+                      const Text(
+                        'Số bàn:',
+                        style: TextStyle(
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      const SizedBox(width: 6),
+                      IconButton(
+                        icon: const Icon(Icons.remove_circle_outline),
+                        color: Colors.red,
+                        onPressed: () => setState(() {
+                          if (soGhe > 1) soGhe--;
+                        }),
+                      ),
+                      Text(
+                        '$soGhe',
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.add_circle_outline),
+                        color: Colors.red,
+                        onPressed: () => setState(() => soGhe++),
+                      ),
+                    ],
                   ),
-                  Text('$soGhe'),
-                  IconButton(
-                    icon: const Icon(Icons.add_circle_outline),
-                    onPressed: () => setState(() => soGhe++),
-                  ),
+
+                  // Icon bàn nằm bên phải
+                  const Icon(Icons.table_bar, color: Colors.red),
                 ],
               ),
             ),
+
             customInputField(
               child: InkWell(
                 onTap: () async {
@@ -249,8 +277,9 @@ class _OrderPageState extends State<OrderPage> {
                 child: InputDecorator(
                   decoration: const InputDecoration(
                     border: InputBorder.none,
-                    prefixIcon: Icon(Icons.calendar_today),
                     labelText: 'Ngày đến',
+
+                    suffixIcon: Icon(Icons.calendar_today, color: Colors.red),
                   ),
                   child: Text(
                     selectedDate == null
@@ -272,8 +301,9 @@ class _OrderPageState extends State<OrderPage> {
                 child: InputDecorator(
                   decoration: const InputDecoration(
                     border: InputBorder.none,
-                    prefixIcon: Icon(Icons.access_time),
                     labelText: 'Giờ đến',
+
+                    suffixIcon: Icon(Icons.access_time, color: Colors.red),
                   ),
                   child: Text(
                     selectedTime == null
@@ -291,6 +321,8 @@ class _OrderPageState extends State<OrderPage> {
                   border: InputBorder.none,
                   labelText: 'Ghi chú',
                   hintText: 'Nhập ghi chú',
+
+                  suffixIcon: Icon(Icons.calendar_today, color: Colors.red),
                 ),
               ),
             ),
@@ -308,7 +340,10 @@ class _OrderPageState extends State<OrderPage> {
                 ),
                 child: isLoading
                     ? const CircularProgressIndicator(color: Colors.white)
-                    : const Text('Đặt bàn', style: TextStyle(fontSize: 16, color: Colors.white)),
+                    : const Text(
+                        'Đặt bàn',
+                        style: TextStyle(fontSize: 16, color: Colors.white),
+                      ),
               ),
             ),
           ],

@@ -48,7 +48,7 @@ class _DetailChiNhanhPageState extends State<DetailChiNhanhPage> {
   @override
   void initState() {
     super.initState();
-     _checkIsLiked();
+    _checkIsLiked();
     _initData();
   }
 
@@ -61,27 +61,72 @@ class _DetailChiNhanhPageState extends State<DetailChiNhanhPage> {
     }
   }
 
-  Future<void> _checkIsLiked() async {
-  final userJson = prefs.getString('user');
-  if (userJson == null || currentBranchId == null) return;
+  Future<void> _checkLoggedInAndNavigate() async {
+    final userJson = prefs.getString('user');
 
-  final userId = jsonDecode(userJson)['_id'];
-
-  try {
-    final res = await http.get(
-      Uri.parse('http://192.168.126.138:5000/api/favorites/check?userId=$userId&branchId=$currentBranchId'),
-    );
-
-    if (res.statusCode == 200) {
-      final data = jsonDecode(res.body);
-      setState(() {
-        isLiked = data['exists']; // true nếu đã thích
-      });
+    if (userJson == null) {
+      // Chưa đăng nhập → hỏi người dùng
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text("Bạn chưa đăng nhập"),
+          content: const Text("Vui lòng đăng nhập để đặt bàn."),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context), // Hủy
+              child: const Text("Hủy"),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context); // đóng dialog
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const LoginPage()),
+                );
+              },
+              child: const Text("Đồng ý"),
+            ),
+          ],
+        ),
+      );
+    } else {
+      // Đã đăng nhập → chuyển qua trang Order
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => OrderPage(
+            imagePath: widget.imagePath,
+            name: widget.name,
+            address: widget.address,
+          ),
+        ),
+      );
     }
-  } catch (e) {
-    print('❌ Lỗi khi kiểm tra yêu thích: $e');
   }
-}
+
+  Future<void> _checkIsLiked() async {
+    final userJson = prefs.getString('user');
+    if (userJson == null || currentBranchId == null) return;
+
+    final userId = jsonDecode(userJson)['_id'];
+
+    try {
+      final res = await http.get(
+        Uri.parse(
+          'http://192.168.126.138:5000/api/favorites/check?userId=$userId&branchId=$currentBranchId',
+        ),
+      );
+
+      if (res.statusCode == 200) {
+        final data = jsonDecode(res.body);
+        setState(() {
+          isLiked = data['exists']; // true nếu đã thích
+        });
+      }
+    } catch (e) {
+      print('❌ Lỗi khi kiểm tra yêu thích: $e');
+    }
+  }
 
   Future<void> _loadBranches() async {
     final allBranches = await BranchService.fetchBranches();
@@ -256,29 +301,8 @@ class _DetailChiNhanhPageState extends State<DetailChiNhanhPage> {
                         ),
                         const SizedBox(height: 16),
                         GestureDetector(
-                          onTap: () {
-                            final isLoggedIn =
-                                prefs.getBool('is_logged_in') ?? false;
-                            if (!isLoggedIn) {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => const LoginPage(),
-                                ),
-                              );
-                            } else {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => OrderPage(
-                                    imagePath: widget.imagePath,
-                                    name: widget.name,
-                                    address: widget.address,
-                                  ),
-                                ),
-                              );
-                            }
-                          },
+                          onTap: _checkLoggedInAndNavigate,
+
                           child: Container(
                             width: double.infinity,
                             padding: const EdgeInsets.symmetric(vertical: 14),

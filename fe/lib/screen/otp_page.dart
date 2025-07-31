@@ -33,7 +33,7 @@ class _OtpPageState extends State<OtpPage> {
       final response = await http.post(
         Uri.parse("http://192.168.126.138:5000/api/auth/verify-otp"),
         headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({'email': _email!.trim(), 'otp': otp.trim()}),
+        body: jsonEncode({'email': _email!.trim(), 'otp': otp}),
       );
 
       final data = jsonDecode(response.body);
@@ -70,24 +70,38 @@ class _OtpPageState extends State<OtpPage> {
     return Scaffold(
       backgroundColor: Colors.grey[200],
       appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        iconTheme: const IconThemeData(color: Colors.redAccent),
+        centerTitle: true,
         title: const Text(
           'Xác minh OTP',
-          style: TextStyle(color: Colors.redAccent, fontWeight: FontWeight.bold),
+          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
         ),
-        centerTitle: true,
+        flexibleSpace: Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              colors: [Color(0xFFB71C1C), Color(0xFFE53935)],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+          ),
+        ),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        iconTheme: const IconThemeData(color: Colors.white),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(24),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start, 
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             const SizedBox(height: 20),
             const Text(
-              'Nhập mã OTP đã gửi đến email của bạn:',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+              'Nhập mã OTP đã gửi đến \n email của bạn:',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w500,
+                color: Colors.black,
+              ),
+              textAlign: TextAlign.center,
             ),
             const SizedBox(height: 20),
             TextField(
@@ -104,26 +118,38 @@ class _OtpPageState extends State<OtpPage> {
                   borderRadius: BorderRadius.circular(12),
                   borderSide: BorderSide.none,
                 ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: const BorderSide(color: Colors.transparent),
+                ),
               ),
+              style: const TextStyle(color: Colors.red),
             ),
             const SizedBox(height: 30),
             SizedBox(
               height: 50,
               width: double.infinity,
-              child: ElevatedButton(
-                onPressed: _isLoading ? null : _verifyOtp,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.redAccent,
-                  shape: RoundedRectangleBorder(
+              child: InkWell(
+                onTap: _isLoading ? null : _verifyOtp,
+                borderRadius: BorderRadius.circular(14),
+                child: Ink(
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(
+                      colors: [Color(0xFFB71C1C), Color(0xFFE53935)],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
                     borderRadius: BorderRadius.circular(14),
                   ),
+                  child: Center(
+                    child: _isLoading
+                        ? const CircularProgressIndicator(color: Colors.white)
+                        : const Text(
+                            'Xác minh',
+                            style: TextStyle(fontSize: 18, color: Colors.white),
+                          ),
+                  ),
                 ),
-                child: _isLoading
-                    ? const CircularProgressIndicator(color: Colors.white)
-                    : const Text(
-                        'Xác minh',
-                        style: TextStyle(fontSize: 18, color: Colors.white),
-                      ),
               ),
             ),
           ],

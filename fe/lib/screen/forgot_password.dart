@@ -85,9 +85,9 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
       child: Text(
         text,
         style: const TextStyle(
-          fontSize: 24,
+          fontSize: 28,
           fontWeight: FontWeight.bold,
-          color: Colors.white, // sẽ bị che bởi ShaderMask
+          color: Colors.white,
         ),
         textAlign: TextAlign.center,
       ),
@@ -97,7 +97,28 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFFFEBEE),
+      backgroundColor: Colors.white, // ✅ Nền trắng
+      appBar: AppBar(
+        title: const Text(
+          "Quên mật khẩu",
+          style: TextStyle(
+            color: Colors.white, // ✅ Chữ trắng trên app bar
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        centerTitle: true,
+        flexibleSpace: Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              colors: [Color(0xFFB71C1C), Color(0xFFE53935)],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+          ),
+        ),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+      ),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(20),
@@ -105,10 +126,8 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                const SizedBox(height: 24),
+                const SizedBox(height: 16),
                 _buildLogo(),
-                const SizedBox(height: 24),
-                _buildGradientTitle('Quên mật khẩu'),
                 const SizedBox(height: 16),
                 const Text(
                   'Nhập địa chỉ email của bạn.\nHệ thống sẽ gửi mã OTP \n để đặt lại mật khẩu.',
@@ -116,42 +135,64 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 32),
+
+                // ✅ TextField với màu chữ và viền màu đỏ
                 TextField(
                   controller: _emailController,
                   keyboardType: TextInputType.emailAddress,
-                  decoration: InputDecoration(
+                  style: const TextStyle(color: Colors.red), // ✅ Chữ đỏ
+                  decoration: const InputDecoration(
                     labelText: 'Email',
-                    suffixIcon: const Icon(Icons.email, color: Colors.redAccent), 
-                    //prefixIcon: const Icon(Icons.email),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    filled: true,
-                    fillColor: Colors.white,
+                    labelStyle: TextStyle(color: Colors.red), // ✅ Label màu đỏ
+                    suffixIcon: Icon(
+                      Icons.email,
+                      color: Colors.red,
+                    ), // ✅ Icon màu đỏ
+                    border: OutlineInputBorder(), // ✅ Dùng viền mặc định
                   ),
                 ),
+
                 const SizedBox(height: 30),
+
+                // ✅ Nút gửi OTP với gradient đỏ
                 SizedBox(
                   width: double.infinity,
                   height: 50,
                   child: ElevatedButton(
                     onPressed: _isLoading ? null : _submit,
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.redAccent,
+                      padding: EdgeInsets.zero,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(14),
                       ),
+                      backgroundColor: Colors.transparent,
+                      shadowColor: Colors.transparent,
                     ),
-                    child: _isLoading
-                        ? const CircularProgressIndicator(color: Colors.white)
-                        : const Text(
-                            'Gửi mã OTP',
-                            style: TextStyle(
-                              fontSize: 18,
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
+                    child: Ink(
+                      decoration: BoxDecoration(
+                        gradient: const LinearGradient(
+                          colors: [Color(0xFFB71C1C), Color(0xFFE53935)],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                        ),
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                      child: Container(
+                        alignment: Alignment.center,
+                        child: _isLoading
+                            ? const CircularProgressIndicator(
+                                color: Colors.white,
+                              )
+                            : const Text(
+                                'Gửi mã OTP',
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                      ),
+                    ),
                   ),
                 ),
               ],

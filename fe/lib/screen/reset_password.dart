@@ -11,7 +11,8 @@ class ResetPasswordPage extends StatefulWidget {
 
 class _ResetPasswordPageState extends State<ResetPasswordPage> {
   final TextEditingController _newPasswordController = TextEditingController();
-  final TextEditingController _confirmPasswordController = TextEditingController();
+  final TextEditingController _confirmPasswordController =
+      TextEditingController();
 
   bool _obscureNew = true;
   bool _obscureConfirm = true;
@@ -23,7 +24,8 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    final args = ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>?;
+    final args =
+        ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>?;
     _email = args?['email'];
     _otpFromOtpPage = args?['otp'];
   }
@@ -84,6 +86,29 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
     );
   }
 
+  Widget _buildLogo() {
+    return const Column(
+      children: [
+        Text(
+          'SeatMe',
+          style: TextStyle(
+            color: Color(0xFFE53935),
+            fontSize: 32,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        Text(
+          'ĐẶT BÀN ONLINE',
+          style: TextStyle(
+            color: Color(0xFFE53935),
+            fontSize: 12,
+            letterSpacing: 1.5,
+          ),
+        ),
+      ],
+    );
+  }
+
   Widget _buildPasswordField({
     required TextEditingController controller,
     required String label,
@@ -95,13 +120,26 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
       obscureText: obscureText,
       decoration: InputDecoration(
         labelText: label,
-        prefixIcon: const Icon(Icons.lock),
+        labelStyle: const TextStyle(color: Colors.red),
         suffixIcon: IconButton(
-          icon: Icon(obscureText ? Icons.visibility : Icons.visibility_off),
+          icon: Icon(
+            obscureText ? Icons.visibility_off : Icons.visibility,
+            color: Colors.red,
+          ),
           onPressed: toggleObscure,
         ),
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+        enabledBorder: OutlineInputBorder(
+          borderSide: const BorderSide(color: Colors.black),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        // Cho focusedBorder trùng với enabledBorder để không nổi bật khi focus
+        focusedBorder: OutlineInputBorder(
+          borderSide: const BorderSide(color: Colors.black),
+          borderRadius: BorderRadius.circular(8),
+        ),
       ),
+      cursorColor: Colors.red,
+      style: const TextStyle(color: Colors.black),
     );
   }
 
@@ -109,13 +147,31 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Đặt lại mật khẩu"),
-        backgroundColor: Colors.redAccent,
+        centerTitle: true, // ✅ Canh giữa tiêu đề
+        title: const Text(
+          "Đặt lại mật khẩu",
+          style: TextStyle(color: Colors.white), // ✅ Màu trắng
+        ),
+        flexibleSpace: Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              colors: [Color(0xFFB71C1C), Color(0xFFE53935)],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+          ),
+        ),
+        backgroundColor: Colors.transparent, // ✅ Gradient sẽ hiển thị đúng
+        elevation: 0,
       ),
+
       body: Padding(
         padding: const EdgeInsets.all(20),
         child: Column(
           children: [
+            const SizedBox(height: 20),
+            _buildLogo(), // Thêm logo vào đầu
+            const SizedBox(height: 30),
             _buildPasswordField(
               controller: _newPasswordController,
               label: "Mật khẩu mới",
@@ -127,18 +183,35 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
               controller: _confirmPasswordController,
               label: "Xác nhận mật khẩu",
               obscureText: _obscureConfirm,
-              toggleObscure: () => setState(() => _obscureConfirm = !_obscureConfirm),
+              toggleObscure: () =>
+                  setState(() => _obscureConfirm = !_obscureConfirm),
             ),
             const SizedBox(height: 30),
-            ElevatedButton(
-              onPressed: _isLoading ? null : _submit,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.redAccent,
-                minimumSize: const Size.fromHeight(50),
+            Container(
+              width: double.infinity,
+              height: 50,
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(
+                  colors: [Color(0xFFB71C1C), Color(0xFFE53935)],
+                ),
+                borderRadius: BorderRadius.circular(8),
               ),
-              child: _isLoading
-                  ? const CircularProgressIndicator(color: Colors.white)
-                  : const Text("Xác nhận", style: TextStyle(fontSize: 18)),
+              child: ElevatedButton(
+                onPressed: _isLoading ? null : _submit,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.transparent,
+                  shadowColor: Colors.transparent,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+                child: _isLoading
+                    ? const CircularProgressIndicator(color: Colors.white)
+                    : const Text(
+                        "Xác nhận",
+                        style: TextStyle(fontSize: 18, color: Colors.white),
+                      ),
+              ),
             ),
           ],
         ),
