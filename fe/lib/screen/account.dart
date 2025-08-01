@@ -7,6 +7,8 @@ import 'package:app_dat_ban/screen/booking_history.dart';
 import 'package:app_dat_ban/screen/like_chua.dart';
 import 'chat_page.dart';
 import 'package:app_dat_ban/screen/edit_profile.dart';
+import 'package:app_dat_ban/screen/admin_chat.dart';
+
 
 class AccountPage extends StatefulWidget {
   const AccountPage({super.key});
@@ -184,6 +186,17 @@ class _AccountPageState extends State<AccountPage> {
             ),
             const SizedBox(height: 20),
 
+            if (_user?['role'] == 'admin')
+              _buildMenuTile(
+                Icons.admin_panel_settings,
+                'Chat với khách hàng',
+                () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const AdminChatPage()),
+                  );
+                },
+              ),
             // Danh sách chức năng
             _buildMenuTile(
               Icons.chat_bubble_outline,

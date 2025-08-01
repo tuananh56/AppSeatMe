@@ -8,6 +8,7 @@ import 'package:app_dat_ban/screen/detailchinhanh.dart';
 //import 'package:app_dat_ban/screen/detail/alluudai.dart';
 import 'package:app_dat_ban/screen/detail/allchinhanh.dart';
 import 'package:app_dat_ban/screen/more.dart';
+import 'package:app_dat_ban/screen/chat.dart';
 import 'package:app_dat_ban/screen/admin.dart' as admin;
 
 class HomePage extends StatefulWidget {
@@ -204,6 +205,18 @@ class _HomeContentState extends State<HomeContent> {
           ],
         ),
       ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => ChatPage(user: widget.user), // 👈 Truyền user
+            ),
+          );
+        },
+        backgroundColor: Colors.blue,
+        child: const Icon(Icons.chat, color: Colors.white),
+      ),
     );
   }
 
@@ -266,9 +279,7 @@ class _HomeContentState extends State<HomeContent> {
         itemCount: _branches.length,
         itemBuilder: (context, index) {
           final branch = _branches[index];
-          return _buildBranchCard(
-            branch
-          );
+          return _buildBranchCard(branch);
         },
       ),
     );

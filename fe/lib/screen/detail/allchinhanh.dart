@@ -142,7 +142,7 @@ class _AllChiNhanhPageState extends State<AllChiNhanhPage> with SingleTickerProv
                       title: Text(branch['name'] ?? ''),
                       subtitle: Text(branch['address'] ?? ''),
                       onTap: () {
-                        Navigator.push(
+                       /*ở đây*/  Navigator.push(
                           context,
                           MaterialPageRoute(
                             builder: (context) => DetailChiNhanhPage(
