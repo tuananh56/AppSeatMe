@@ -36,7 +36,7 @@ class _BookingHistoryPageState extends State<BookingHistoryPage> {
 
   Future<void> fetchBookingHistory() async {
     final url = Uri.parse(
-      'http://192.168.126.138:5000/api/bookings/history/${widget.userId}',
+      'http://192.168.228.138:5000/api/bookings/history/${widget.userId}',
     );
     try {
       final response = await http.get(url);

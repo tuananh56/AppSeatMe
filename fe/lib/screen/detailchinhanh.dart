@@ -6,7 +6,7 @@ import 'order.dart';
 import 'login.dart';
 
 class BranchService {
-  static const String baseUrl = 'http://192.168.126.138:5000/api/branches';
+  static const String baseUrl = 'http://192.168.228.138:5000/api/branches';
 
   static Future<List<dynamic>> fetchBranches() async {
     try {
@@ -122,7 +122,7 @@ class _DetailChiNhanhPageState extends State<DetailChiNhanhPage> {
     try {
       final res = await http.get(
         Uri.parse(
-          'http://192.168.126.138:5000/api/favorites/check?userId=$userId&branchId=$currentBranchId',
+          'http://192.168.228.138:5000/api/favorites/check?userId=$userId&branchId=$currentBranchId',
         ),
       );
 
@@ -169,7 +169,7 @@ class _DetailChiNhanhPageState extends State<DetailChiNhanhPage> {
 
     final res = await http.get(
       Uri.parse(
-        'http://192.168.126.138:5000/api/favorites/check?userId=$userId&branchId=$currentBranchId',
+        'http://192.168.228.138:5000/api/favorites/check?userId=$userId&branchId=$currentBranchId',
       ),
     );
 
@@ -190,7 +190,7 @@ class _DetailChiNhanhPageState extends State<DetailChiNhanhPage> {
     if (isLiked) {
       // Đã like → Gỡ like
       final res = await http.delete(
-        Uri.parse('http://192.168.126.138:5000/api/favorites'),
+        Uri.parse('http://192.168.228.138:5000/api/favorites'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({'userId': userId, 'branchId': currentBranchId}),
       );
@@ -208,7 +208,7 @@ class _DetailChiNhanhPageState extends State<DetailChiNhanhPage> {
     } else {
       // Chưa like → Thêm yêu thích
       final res = await http.post(
-        Uri.parse('http://192.168.126.138:5000/api/favorites'),
+        Uri.parse('http://192.168.228.138:5000/api/favorites'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({'userId': userId, 'branchId': currentBranchId}),
       );

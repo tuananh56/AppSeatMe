@@ -38,7 +38,7 @@ class _NearYouPageState extends State<NearYouPage> {
       );
 
       final url =
-          'http://192.168.126.138:5000/api/branches/nearby?lat=${position.latitude}&lng=${position.longitude}&distance=20000';
+          'http://192.168.228.138:5000/api/branches/nearby?lat=${position.latitude}&lng=${position.longitude}&distance=20000';
 
       final response = await http.get(Uri.parse(url));
 

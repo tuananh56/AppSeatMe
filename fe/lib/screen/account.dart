@@ -9,7 +9,6 @@ import 'chat_page.dart';
 import 'package:app_dat_ban/screen/edit_profile.dart';
 import 'package:app_dat_ban/screen/admin_chat.dart';
 
-
 class AccountPage extends StatefulWidget {
   const AccountPage({super.key});
 
@@ -156,7 +155,7 @@ class _AccountPageState extends State<AccountPage> {
                       backgroundImage:
                           (_userImage != null && _userImage!.isNotEmpty)
                           ? NetworkImage(
-                              "http://192.168.126.138:5000$_userImage",
+                              "http://192.168.228.138:5000$_userImage",
                             )
                           : null,
                       child: (_userImage == null || _userImage!.isEmpty)
@@ -185,15 +184,14 @@ class _AccountPageState extends State<AccountPage> {
               ),
             ),
             const SizedBox(height: 20),
-
-            if (_user?['role'] == 'admin')
+            if (_user != null && _user!['role'] == 'admin')
               _buildMenuTile(
                 Icons.admin_panel_settings,
                 'Chat với khách hàng',
                 () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (_) => const AdminChatPage()),
+                    MaterialPageRoute(builder: (_) => const AdminChatScreen()),
                   );
                 },
               ),

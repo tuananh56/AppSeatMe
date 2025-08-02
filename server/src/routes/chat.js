@@ -53,7 +53,7 @@ router.get('/:userId/:otherId', async (req, res) => {
   }
 });
 
-// 📌 Lấy tất cả các user đã nhắn tin với admin
+/*// 📌 Lấy tất cả các user đã nhắn tin với admin
 router.get('/history', async (req, res) => {
   try {
     const adminId = '686bfd52d27d660c25c71c2c'; // ID cố định của admin
@@ -75,6 +75,53 @@ router.get('/history', async (req, res) => {
     console.error('❌ Lỗi lấy lịch sử:', err);
     res.status(500).json({ error: err.message });
   }
+});*/
+// 📌 Lấy tất cả các user đã nhắn tin với admin, kèm avatar + tên
+router.get('/history', async (req, res) => {
+  try {
+    const adminId = '686bfd52d27d660c25c71c2c'; // ID cố định của admin
+
+    const chats = await Chat.find({
+      $or: [{ senderId: adminId }, { receiverId: adminId }]
+    }).sort({ createdAt: -1 });
+
+    const grouped = {};
+    const userIds = new Set();
+
+    // Gom tin nhắn theo từng userId (khác admin)
+    chats.forEach(chat => {
+      const otherId = chat.senderId === adminId ? chat.receiverId : chat.senderId;
+      userIds.add(otherId);
+      if (!grouped[otherId]) grouped[otherId] = [];
+      grouped[otherId].push(chat);
+    });
+
+    // Truy vấn thông tin user (name + avatar)
+    const users = await User.find({ _id: { $in: Array.from(userIds) } })
+      .select('name imageUrl'); // Chỉ lấy tên và ảnh
+
+    const userMap = {};
+    users.forEach(u => {
+      userMap[u._id] = {
+        name: u.name,
+        imageUrl: u.imageUrl,
+      };
+    });
+
+    // Kết hợp kết quả trả về
+    const result = Object.entries(grouped).map(([userId, messages]) => ({
+      userId,
+      userInfo: userMap[userId] || { name: 'Không rõ', imageUrl: '' },
+      lastMessage: messages[0], // Tin nhắn gần nhất
+      messages
+    }));
+
+    res.json(result);
+  } catch (err) {
+    console.error('❌ Lỗi lấy lịch sử:', err);
+    res.status(500).json({ error: err.message });
+  }
 });
+
 
 module.exports = router;

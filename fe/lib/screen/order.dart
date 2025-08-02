@@ -60,7 +60,7 @@ class _OrderPageState extends State<OrderPage> {
       return;
     }
 
-    final uri = Uri.parse('http://192.168.126.138:5000/api/bookings');
+    final uri = Uri.parse('http://192.168.228.138:5000/api/bookings');
 
     final body = {
       'userId': userId,

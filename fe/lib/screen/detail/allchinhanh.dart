@@ -33,7 +33,7 @@ class _AllChiNhanhPageState extends State<AllChiNhanhPage> with SingleTickerProv
 
   Future<void> fetchBranches() async {
     try {
-      final response = await http.get(Uri.parse('http://192.168.126.138:5000/api/branches'));
+      final response = await http.get(Uri.parse('http://192.168.228.138:5000/api/branches'));
       if (response.statusCode == 200) {
         final List<dynamic> data = jsonDecode(response.body);
         setState(() {

@@ -31,7 +31,7 @@ class _OtpPageState extends State<OtpPage> {
     setState(() => _isLoading = true);
     try {
       final response = await http.post(
-        Uri.parse("http://192.168.126.138:5000/api/auth/verify-otp"),
+        Uri.parse("http://192.168.228.138:5000/api/auth/verify-otp"),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({'email': _email!.trim(), 'otp': otp}),
       );

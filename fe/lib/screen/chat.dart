@@ -18,8 +18,10 @@ class _ChatPageNewState extends State<ChatPage> {
   final ScrollController _scrollController = ScrollController();
   List<Map<String, dynamic>> messages = [];
 
-  // ID Admin lấy từ MongoDB
   final String adminId = '686bfd52d27d660c25c71c2c';
+  String adminName = "Admin";
+  String adminAvatar =
+      "https://cdn-icons-png.flaticon.com/512/149/149071.png"; // Avatar Admin
 
   @override
   void initState() {
@@ -28,9 +30,7 @@ class _ChatPageNewState extends State<ChatPage> {
       Future.microtask(() {
         Navigator.pop(context);
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text("⚠️ Vui lòng đăng nhập để sử dụng chat"),
-          ),
+          const SnackBar(content: Text("⚠️ Vui lòng đăng nhập để sử dụng chat")),
         );
       });
     } else {
@@ -39,22 +39,17 @@ class _ChatPageNewState extends State<ChatPage> {
     }
   }
 
-  /// Kết nối Socket.IO
   void _connectSocket() {
     socket = IO.io(
-      'http://192.168.126.138:5000',
+      'http://192.168.228.138:5000',
       OptionBuilder().setTransports(['websocket']).build(),
     );
 
     socket.onConnect((_) {
-      print('🟢 Connected to chat server');
-
-      // Gửi ID người dùng lên server để định danh
       socket.emit('join', widget.user?['_id']);
     });
 
     socket.on('receiveMessage', (data) {
-      print("📥 Tin nhắn socket: $data");
       setState(() {
         messages.add(Map<String, dynamic>.from(data));
       });
@@ -62,12 +57,11 @@ class _ChatPageNewState extends State<ChatPage> {
     });
   }
 
-  /// Lấy lịch sử chat giữa user và admin
   Future<void> _fetchChatHistory() async {
     try {
       final userId = widget.user?['_id'];
       final res = await http.get(
-        Uri.parse('http://192.168.126.138:5000/api/chat/$userId/$adminId'),
+        Uri.parse('http://192.168.228.138:5000/api/chat/$userId/$adminId'),
       );
 
       if (res.statusCode == 200) {
@@ -75,15 +69,12 @@ class _ChatPageNewState extends State<ChatPage> {
           messages = List<Map<String, dynamic>>.from(jsonDecode(res.body));
         });
         _scrollToBottom();
-      } else {
-        print("❌ Lỗi lấy lịch sử chat: ${res.statusCode}");
       }
     } catch (e) {
-      print("🚨 Exception khi load lịch sử chat: $e");
+      print("🚨 Exception: $e");
     }
   }
 
-  /// Gửi tin nhắn
   void _sendMessage() async {
     if (_messageController.text.trim().isEmpty) return;
 
@@ -91,16 +82,14 @@ class _ChatPageNewState extends State<ChatPage> {
       'senderId': widget.user?['_id'],
       'receiverId': adminId,
       'message': _messageController.text.trim(),
-      'createdAt': DateTime.now().toIso8601String(), // để hiển thị ngay
+      'createdAt': DateTime.now().toIso8601String(),
     };
 
-    // Gửi socket để realtime
     socket.emit('sendMessage', msg);
 
-    // Gửi HTTP để lưu DB
     try {
-      final res = await http.post(
-        Uri.parse('http://192.168.126.138:5000/api/chat'),
+      await http.post(
+        Uri.parse('http://192.168.228.138:5000/api/chat'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
           'senderId': msg['senderId'],
@@ -108,23 +97,17 @@ class _ChatPageNewState extends State<ChatPage> {
           'message': msg['message'],
         }),
       );
-      if (res.statusCode != 201) {
-        print('❌ Không lưu được tin nhắn vào DB: ${res.body}');
-      }
     } catch (e) {
-      print('🚨 Lỗi khi gọi API lưu tin nhắn: $e');
+      print('🚨 API Error: $e');
     }
 
-    // Hiển thị ngay
     setState(() {
       messages.add(msg);
     });
-
     _messageController.clear();
     _scrollToBottom();
   }
 
-  /// Cuộn xuống cuối danh sách chat
   void _scrollToBottom() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (_scrollController.hasClients) {
@@ -148,8 +131,36 @@ class _ChatPageNewState extends State<ChatPage> {
 
   @override
   Widget build(BuildContext context) {
+    final userAvatar = widget.user?['imageUrl'] != null
+        ? "http://192.168.228.138:5000${widget.user?['imageUrl']}"
+        : "https://cdn-icons-png.flaticon.com/512/149/149071.png";
+
     return Scaffold(
-      appBar: AppBar(title: const Text('Chat Hỗ trợ')),
+      appBar: AppBar(
+        automaticallyImplyLeading: false,
+        flexibleSpace: Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              colors: [Color(0xFF6E0000), Color(0xFFFF2323)],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+          ),
+        ),
+        title: Row(
+          children: [
+            CircleAvatar(backgroundImage: NetworkImage(adminAvatar), radius: 16),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                adminName,
+                style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          ],
+        ),
+      ),
       body: Column(
         children: [
           Expanded(
@@ -159,46 +170,28 @@ class _ChatPageNewState extends State<ChatPage> {
               itemBuilder: (context, index) {
                 final msg = messages[index];
                 final isMe = msg['senderId'] == widget.user?['_id'];
-                final isAdmin = msg['senderId'] == adminId;
                 final createdAt = msg['createdAt'] != null
                     ? DateTime.tryParse(msg['createdAt'].toString())
                     : null;
 
                 return Align(
-                  alignment: isMe
-                      ? Alignment.centerRight
-                      : Alignment.centerLeft,
+                  alignment: isMe ? Alignment.centerRight : Alignment.centerLeft,
                   child: Container(
-                    margin: const EdgeInsets.symmetric(
-                      vertical: 4,
-                      horizontal: 8,
-                    ),
-                    padding: const EdgeInsets.all(12),
+                    margin: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+                    padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
                     decoration: BoxDecoration(
-                      color: isMe
-                          ? Colors.blue
-                          : isAdmin
-                          ? Colors.grey[300]
-                          : Colors.red[100],
+                      color: isMe ? Colors.blue : Colors.grey[300],
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                      crossAxisAlignment:
+                          isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
                       children: [
-                        if (isAdmin) ...[
-                          const Text(
-                            "Admin",
-                            style: TextStyle(
-                              fontSize: 11,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          const SizedBox(height: 4),
-                        ],
                         Text(
                           msg['message'] ?? '',
                           style: TextStyle(
                             color: isMe ? Colors.white : Colors.black,
+                            fontSize: 16,
                           ),
                         ),
                         if (createdAt != null) ...[
@@ -206,7 +199,7 @@ class _ChatPageNewState extends State<ChatPage> {
                           Text(
                             "${createdAt.hour.toString().padLeft(2, '0')}:${createdAt.minute.toString().padLeft(2, '0')}",
                             style: TextStyle(
-                              fontSize: 10,
+                              fontSize: 12,
                               color: isMe ? Colors.white70 : Colors.black54,
                             ),
                           ),
@@ -218,8 +211,10 @@ class _ChatPageNewState extends State<ChatPage> {
               },
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.all(8.0),
+          Divider(height: 1),
+          Container(
+            color: Colors.white,
+            padding: const EdgeInsets.symmetric(horizontal: 8),
             child: Row(
               children: [
                 Expanded(
@@ -227,7 +222,8 @@ class _ChatPageNewState extends State<ChatPage> {
                     controller: _messageController,
                     decoration: const InputDecoration(
                       hintText: 'Nhập tin nhắn...',
-                      border: OutlineInputBorder(),
+                      border: InputBorder.none,
+                      contentPadding: EdgeInsets.symmetric(vertical: 15), 
                     ),
                   ),
                 ),

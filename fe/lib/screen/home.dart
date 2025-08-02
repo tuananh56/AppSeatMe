@@ -123,7 +123,7 @@ class _HomeContentState extends State<HomeContent> {
   Future<void> fetchBranches() async {
     try {
       final response = await http.get(
-        Uri.parse('http://192.168.126.138:5000/api/branches'),
+        Uri.parse('http://192.168.228.138:5000/api/branches'),
       );
 
       if (response.statusCode == 200) {
@@ -146,7 +146,7 @@ class _HomeContentState extends State<HomeContent> {
   Future<void> fetchDeals() async {
     try {
       final response = await http.get(
-        Uri.parse('http://192.168.126.138:5000/api/deals'),
+        Uri.parse('http://192.168.228.138:5000/api/deals'),
       );
 
       if (response.statusCode == 200) {
@@ -198,7 +198,7 @@ class _HomeContentState extends State<HomeContent> {
             _buildSectionHeader('Chi nhánh nhà hàng'),
             const SizedBox(height: 16),
             _buildBranchList(),
-            const SizedBox(height: 24),
+            const SizedBox(height: 12),
             _buildSectionHeader('Ưu đãi cực HOT'),
             const SizedBox(height: 16),
             _buildDealsList(),
@@ -272,7 +272,7 @@ class _HomeContentState extends State<HomeContent> {
     }
 
     return SizedBox(
-      height: 270,
+      height: 250,
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.only(right: 16),
@@ -305,33 +305,44 @@ class _HomeContentState extends State<HomeContent> {
         margin: const EdgeInsets.only(right: 16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment:
+              MainAxisAlignment.spaceBetween, // 🔥 Đẩy text cuối xuống
           children: [
-            ClipRRect(
-              borderRadius: BorderRadius.circular(8.0),
-              child: Image.asset(
-                'assets/imgChiNhanh/${branch['image']}',
-                height: 120,
-                width: double.infinity,
-                fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) =>
-                    const Icon(Icons.image_not_supported),
-              ),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(8.0),
+                  child: Image.asset(
+                    'assets/imgChiNhanh/${branch['image']}',
+                    height: 120,
+                    width: double.infinity,
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) =>
+                        const Icon(Icons.image_not_supported),
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  branch['name'],
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  branch['address'],
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(fontSize: 12, color: Colors.grey),
+                ),
+              ],
             ),
             const SizedBox(height: 8),
-            Text(
-              branch['name'],
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              branch['address'],
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-              style: const TextStyle(fontSize: 12, color: Colors.grey),
-            ),
-            const SizedBox(height: 8),
+            // 🔥 Chỉ giữ Text ở dưới cùng
             Text(
               'Đặt bàn giữ chỗ',
               style: TextStyle(
@@ -345,7 +356,6 @@ class _HomeContentState extends State<HomeContent> {
       ),
     );
   }
-
   Widget _buildDealsList() {
     if (_isLoadingDeals) {
       return const Center(child: CircularProgressIndicator());

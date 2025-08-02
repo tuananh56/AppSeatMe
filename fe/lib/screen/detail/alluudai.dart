@@ -21,7 +21,7 @@ class _AllUuDaiPageState extends State<AllUuDaiPage> {
 
   Future<void> fetchDeals() async {
     try {
-      final response = await http.get(Uri.parse('http://192.168.126.138:5000/api/deals'));
+      final response = await http.get(Uri.parse('http://192.168.228.138:5000/api/deals'));
       if (response.statusCode == 200) {
         final List<dynamic> data = jsonDecode(response.body);
         setState(() {

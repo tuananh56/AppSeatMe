@@ -4,7 +4,7 @@ import 'package:http/http.dart' as http;
 import 'package:path/path.dart';
 
 class ApiService {
-  static const String baseUrl = 'http://192.168.126.138:5000/api/auth';
+  static const String baseUrl = 'http://192.168.228.138:5000/api/auth';
 
   /// Đăng ký tài khoản với ảnh đại diện (multipart/form-data)
   static Future<String?> register(
@@ -111,7 +111,7 @@ class ApiService {
     String? newPassword,
     required String userId,
   }) async {
-    final uri = Uri.parse('http://192.168.126.138:5000/api/auth/$userId');
+    final uri = Uri.parse('http://192.168.228.138:5000/api/auth/$userId');
 
     try {
       final request = http.MultipartRequest('PUT', uri);

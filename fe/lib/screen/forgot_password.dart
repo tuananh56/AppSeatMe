@@ -23,7 +23,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
     setState(() => _isLoading = true);
     try {
       final response = await http.post(
-        Uri.parse("http://192.168.126.138:5000/api/auth/send-otp"),
+        Uri.parse("http://192.168.228.138:5000/api/auth/send-otp"),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({'email': email}),
       );

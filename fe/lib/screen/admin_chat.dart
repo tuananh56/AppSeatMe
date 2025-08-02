@@ -1,242 +1,384 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'dart:convert';
+import 'package:intl/intl.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
-import 'package:socket_io_client/socket_io_client.dart' show OptionBuilder;
 
-class AdminChatPage extends StatefulWidget {
-  const AdminChatPage({Key? key}) : super(key: key);
+class AdminChatScreen extends StatefulWidget {
+  const AdminChatScreen({super.key});
 
   @override
-  State<AdminChatPage> createState() => _AdminChatPageState();
+  State<AdminChatScreen> createState() => _AdminChatScreenState();
 }
 
-class _AdminChatPageState extends State<AdminChatPage> {
+class _AdminChatScreenState extends State<AdminChatScreen> {
   late IO.Socket socket;
-  Map<String, List<Map<String, dynamic>>> userMessages = {};
-  Map<String, String> userAvatars = {}; // userId -> avatarUrl
+  String adminId = '686bfd52d27d660c25c71c2c'; // ID cố định của admin
   String? selectedUserId;
-  final TextEditingController _messageController = TextEditingController();
-  bool isLoading = true;
 
-  final String adminId = '686bfd52d27d660c25c71c2c';
+  Map<String, List<dynamic>> userMessages = {}; // userId -> list of messages
+  Map<String, String> userAvatars = {}; // userId -> avatar URL
+  Map<String, String> userNames = {}; // userId -> name
+
+  final TextEditingController _messageController = TextEditingController();
+  final ScrollController _scrollController = ScrollController();
 
   @override
   void initState() {
     super.initState();
     _connectSocket();
-    _loadChatHistory();
-  }
-
-  void _connectSocket() {
-    socket = IO.io(
-      'http://192.168.126.138:5000',
-      OptionBuilder().setTransports(['websocket']).build(),
-    );
-
-    socket.onConnect((_) {
-      print('🟢 Admin connected to chat server');
-    });
-
-    socket.on('receiveMessage', (data) {
-      final msg = Map<String, dynamic>.from(data);
-      final userId = msg['senderId'];
-
-      setState(() {
-        if (!userMessages.containsKey(userId)) {
-          userMessages[userId] = [];
-        }
-        userMessages[userId]!.add(msg);
-        selectedUserId ??= userId;
-      });
-
-      _fetchUserAvatar(userId);
-    });
-  }
-
-  Future<void> _fetchUserAvatar(String userId) async {
-    if (userAvatars.containsKey(userId)) return;
-    try {
-      final res = await http.get(Uri.parse('http://192.168.126.138:5000/api/users/$userId'));
-      if (res.statusCode == 200) {
-        final data = jsonDecode(res.body);
-        setState(() {
-          userAvatars[userId] = data['avatar'] ?? '';
-        });
-      }
-    } catch (_) {}
-  }
-
-  Future<void> _loadChatHistory() async {
-    try {
-      final response = await http.get(Uri.parse('http://192.168.126.138:5000/api/chat/history'));
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        final Map<String, List<dynamic>> rawMessages = Map<String, List<dynamic>>.from(data);
-
-        final Map<String, List<Map<String, dynamic>>> loadedMessages = {};
-        rawMessages.forEach((userId, msgs) {
-          loadedMessages[userId] = msgs.map((e) => Map<String, dynamic>.from(e)).toList();
-          _fetchUserAvatar(userId);
-        });
-
-        setState(() {
-          userMessages = loadedMessages;
-          selectedUserId = userMessages.keys.isNotEmpty ? userMessages.keys.first : null;
-          isLoading = false;
-        });
-      } else {
-        setState(() => isLoading = false);
-        print('Failed to load chat history: ${response.statusCode}');
-      }
-    } catch (e) {
-      setState(() => isLoading = false);
-      print('Error loading chat history: $e');
-    }
-  }
-
-  void _sendMessage() {
-    if (selectedUserId == null) return;
-    final text = _messageController.text.trim();
-    if (text.isEmpty) return;
-
-    final msg = {
-      'senderId': adminId,
-      'receiverId': selectedUserId,
-      'message': text,
-      'timestamp': DateTime.now().toIso8601String(),
-    };
-
-    socket.emit('sendMessage', msg);
-
-    setState(() {
-      userMessages[selectedUserId]!.add(msg);
-    });
-
-    _messageController.clear();
-  }
-
-  Widget _buildUserList() {
-    return Container(
-      width: 120,
-      color: Colors.grey[200],
-      child: ListView(
-        children: userMessages.keys.map((userId) {
-          final avatar = userAvatars[userId];
-          return ListTile(
-            selected: userId == selectedUserId,
-            leading: CircleAvatar(
-              radius: 18,
-              backgroundImage:
-                  avatar != null && avatar.isNotEmpty ? NetworkImage(avatar) : null,
-              child: avatar == null || avatar.isEmpty ? const Icon(Icons.person) : null,
-            ),
-            title: Text(userId, maxLines: 1, overflow: TextOverflow.ellipsis),
-            onTap: () => setState(() => selectedUserId = userId),
-          );
-        }).toList(),
-      ),
-    );
-  }
-
-  Widget _buildChatMessages() {
-    if (selectedUserId == null) return const Center(child: Text('Chưa có cuộc trò chuyện nào'));
-    final messages = userMessages[selectedUserId] ?? [];
-
-    return ListView.builder(
-      reverse: true,
-      padding: const EdgeInsets.all(8),
-      itemCount: messages.length,
-      itemBuilder: (context, index) {
-        final msg = messages[messages.length - 1 - index];
-        final isAdmin = msg['senderId'] == adminId;
-        final avatarUrl = isAdmin ? null : userAvatars[msg['senderId']];
-
-        return Row(
-          mainAxisAlignment: isAdmin ? MainAxisAlignment.end : MainAxisAlignment.start,
-          crossAxisAlignment: CrossAxisAlignment.end,
-          children: [
-            if (!isAdmin)
-              CircleAvatar(
-                radius: 16,
-                backgroundImage: avatarUrl != null && avatarUrl.isNotEmpty
-                    ? NetworkImage(avatarUrl)
-                    : null,
-                child: avatarUrl == null || avatarUrl.isEmpty ? const Icon(Icons.person, size: 16) : null,
-              ),
-            Container(
-              margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-              padding: const EdgeInsets.all(10),
-              constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.6),
-              decoration: BoxDecoration(
-                color: isAdmin ? Colors.blue : Colors.grey[300],
-                borderRadius: BorderRadius.circular(16),
-              ),
-              child: Text(
-                msg['message'] ?? '',
-                style: TextStyle(color: isAdmin ? Colors.white : Colors.black),
-              ),
-            ),
-            if (isAdmin)
-              const CircleAvatar(
-                radius: 16,
-                backgroundColor: Colors.blue,
-                child: Icon(Icons.admin_panel_settings, color: Colors.white, size: 16),
-              ),
-          ],
-        );
-      },
-    );
+    _fetchChatHistory();
   }
 
   @override
   void dispose() {
     socket.dispose();
     _messageController.dispose();
+    _scrollController.dispose();
     super.dispose();
+  }
+
+  void _connectSocket() {
+    socket = IO.io(
+      'http://192.168.228.138:5000',
+      IO.OptionBuilder()
+          .setTransports(['websocket'])
+          .enableAutoConnect()
+          .build(),
+    );
+
+    socket.connect();
+
+    socket.onConnect((_) {
+      print('Socket connected');
+    });
+
+    socket.on('receiveMessage', (data) {
+      String senderId = data['senderId'];
+      setState(() {
+        userMessages.putIfAbsent(senderId, () => []);
+        userMessages[senderId]!.add(data);
+        selectedUserId ??= senderId;
+      });
+    });
+
+    socket.onDisconnect((_) => print('Socket disconnected'));
+  }
+
+  Future<void> _fetchChatHistory() async {
+    try {
+      final res = await http.get(
+        Uri.parse('http://192.168.228.138:5000/api/chat/history'),
+      );
+
+      if (res.statusCode == 200) {
+        final List<dynamic> data = jsonDecode(res.body);
+
+        // Duyệt qua từng user trong danh sách trả về
+        for (var item in data) {
+          final String userId = item['userId'];
+          final Map<String, dynamic> userInfo = item['userInfo'] ?? {};
+          final List<dynamic> messages = List.from(item['messages'] ?? []);
+
+          // Lưu tin nhắn, tên, avatar
+          userMessages[userId] = messages;
+          userNames[userId] = userInfo['name'] ?? 'Ẩn danh';
+          userAvatars[userId] =
+              (userInfo['imageUrl'] != null &&
+                  userInfo['imageUrl'].toString().isNotEmpty)
+              ? 'http://192.168.228.138:5000${userInfo['imageUrl']}'
+              : '';
+        }
+
+        // Auto chọn user đầu tiên
+        if (data.isNotEmpty) {
+          setState(() {
+            selectedUserId = data.first['userId'];
+          });
+        }
+      }
+    } catch (e) {
+      print('Error fetching history: $e');
+    }
+  }
+
+  Future<void> _fetchUserAvatar(String userId) async {
+    if (userAvatars.containsKey(userId)) return;
+
+    try {
+      final res = await http.get(
+        Uri.parse('http://192.168.228.138:5000/api/users/$userId'),
+      );
+
+      if (res.statusCode == 200) {
+        final data = jsonDecode(res.body);
+        setState(() {
+          userAvatars[userId] = data['imageUrl'] != null
+              ? 'http://192.168.228.138:5000${data['imageUrl']}'.replaceFirst(
+                  '//',
+                  '/',
+                )
+              : '';
+          userNames[userId] = data['name'] ?? 'Ẩn danh';
+        });
+      }
+    } catch (e) {
+      print('Error fetching avatar: $e');
+    }
+  }
+
+  void _sendMessage() {
+    final text = _messageController.text.trim();
+    if (text.isEmpty || selectedUserId == null) return;
+
+    final message = {
+      'senderId': adminId,
+      'receiverId': selectedUserId,
+      'message': text,
+      'timestamp': DateTime.now().toIso8601String(),
+    };
+
+    socket.emit('sendMessage', message);
+
+    setState(() {
+      userMessages[selectedUserId]!.add(message);
+      _messageController.clear();
+    });
+
+    // Scroll to bottom
+    Future.delayed(Duration(milliseconds: 100), () {
+      if (_scrollController.hasClients) {
+        _scrollController.animateTo(
+          _scrollController.position.maxScrollExtent,
+          duration: Duration(milliseconds: 300),
+          curve: Curves.easeOut,
+        );
+      }
+    });
+  }
+
+  Widget _buildUserList() {
+    return Container(
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            Color(0xFF6E0000), // Đỏ đậm
+            Color(0xFFFF2323), // Đỏ sáng
+          ],
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+        ),
+      ),
+      child: ListView(
+        children: userMessages.keys.map((userId) {
+          final avatar = userAvatars[userId] ?? '';
+          final name = userNames[userId] ?? 'Ẩn danh';
+          final lastMsg = (userMessages[userId]?.isNotEmpty ?? false)
+              ? userMessages[userId]!.last['message']
+              : '';
+          return ListTile(
+            leading: CircleAvatar(
+              backgroundColor: Colors.grey[300],
+              backgroundImage: avatar.isNotEmpty ? NetworkImage(avatar) : null,
+              child: avatar.isEmpty
+                  ? const Icon(Icons.person, color: Colors.white)
+                  : null,
+            ),
+            title: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: selectedUserId == userId
+                      ? [
+                          Color(0xFF004AAD),
+                          Color(0xFF00CFFF),
+                        ] // 🌟 Khi được chọn
+                      : [Color(0xFF6E0000), Color(0xFFFF2323)], // 🔴 Mặc định
+                ),
+                borderRadius: const BorderRadius.all(Radius.circular(6)),
+              ),
+              child: Text(
+                name,
+                style: const TextStyle(
+                  fontWeight: FontWeight.w600,
+                  color: Colors.white,
+                ),
+              ),
+            ),
+            subtitle: Text(
+              lastMsg,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(color: Colors.white70, fontSize: 12),
+            ),
+            onTap: () {
+              setState(() {
+                selectedUserId = userId;
+              });
+              Navigator.pop(context);
+            },
+          );
+        }).toList(),
+      ),
+    );
+  }
+
+  Widget _buildMessages() {
+    final messages = userMessages[selectedUserId] ?? [];
+
+    return Container(
+      color: Colors.white,
+      child: Column(
+        children: [
+          Expanded(
+            child: ListView.builder(
+              controller: _scrollController,
+              padding: EdgeInsets.all(16),
+              itemCount: messages.length,
+              itemBuilder: (context, index) {
+                final msg = messages[index];
+                final isMe = msg['senderId'] == adminId;
+                final time = DateFormat('HH:mm').format(
+                  DateTime.tryParse(
+                        msg['createdAt'] ?? msg['timestamp'] ?? '',
+                      ) ??
+                      DateTime.now(),
+                );
+
+                return Align(
+                  alignment: isMe
+                      ? Alignment.centerRight
+                      : Alignment.centerLeft,
+                  child: Container(
+                    margin: EdgeInsets.symmetric(vertical: 6),
+                    padding: EdgeInsets.symmetric(vertical: 10, horizontal: 14),
+                    constraints: BoxConstraints(maxWidth: 300),
+                    decoration: BoxDecoration(
+                      color: isMe ? Colors.blue[600] : Colors.grey[200],
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: isMe
+                          ? CrossAxisAlignment.end
+                          : CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          msg['message'] ?? '',
+                          style: TextStyle(
+                            color: isMe ? Colors.white : Colors.black87,
+                            fontSize: 15,
+                          ),
+                        ),
+                        SizedBox(height: 4),
+                        Text(
+                          time,
+                          style: TextStyle(
+                            fontSize: 11,
+                            color: isMe ? Colors.white70 : Colors.black54,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+          Divider(height: 1),
+          Container(
+            margin: const EdgeInsets.only(bottom: 10),
+            padding: EdgeInsets.all(10),
+            color: Colors.grey[50],
+            child: Row(
+              children: [
+                Expanded(
+                  child: Container(
+                    padding: EdgeInsets.symmetric(horizontal: 16),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(30),
+                      border: Border.all(color: Colors.grey[300]!),
+                    ),
+                    child: TextField(
+                      controller: _messageController,
+                      decoration: InputDecoration(
+                        border: InputBorder.none,
+                        hintText: 'Nhập tin nhắn...',
+                      ),
+                    ),
+                  ),
+                ),
+                SizedBox(width: 8),
+                CircleAvatar(
+                  backgroundColor: Colors.blue,
+                  child: IconButton(
+                    icon: Icon(Icons.send, color: Colors.white),
+                    onPressed: _sendMessage,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Admin Chat')),
-      body: isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : Row(
-              children: [
-                _buildUserList(),
-                Expanded(
-                  child: Column(
-                    children: [
-                      Expanded(child: _buildChatMessages()),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Row(
-                          children: [
-                            Expanded(
-                              child: TextField(
-                                controller: _messageController,
-                                decoration: const InputDecoration(
-                                  hintText: 'Nhập tin nhắn...',
-                                  border: OutlineInputBorder(),
-                                ),
-                                minLines: 1,
-                                maxLines: 5,
-                              ),
-                            ),
-                            const SizedBox(width: 8),
-                            IconButton(
-                              icon: const Icon(Icons.send),
-                              onPressed: _sendMessage,
-                            ),
-                          ],
-                        ),
-                      )
-                    ],
-                  ),
-                ),
-              ],
+      appBar: AppBar(
+        automaticallyImplyLeading: false,
+        flexibleSpace: Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              colors: [Color(0xFF6E0000), Color(0xFFFF2323)],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
             ),
+          ),
+        ),
+        title: Row(
+          children: [
+            Builder(
+              builder: (context) => IconButton(
+                icon: const Icon(Icons.menu, color: Colors.white),
+                onPressed: () =>
+                    Scaffold.of(context).openDrawer(), // ✅ Fix context
+              ),
+            ),
+            const SizedBox(width: 8),
+            if (selectedUserId != null &&
+                userAvatars[selectedUserId]?.isNotEmpty == true)
+              CircleAvatar(
+                radius: 16,
+                backgroundImage: NetworkImage(userAvatars[selectedUserId]!),
+              ),
+            if (selectedUserId != null &&
+                userAvatars[selectedUserId]?.isNotEmpty == true)
+              const SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                selectedUserId != null
+                    ? userNames[selectedUserId] ?? 'Hỗ trợ khách hàng'
+                    : 'Chọn người dùng',
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          ],
+        ),
+      ),
+
+      drawer: Drawer(
+        child: _buildUserList(), // Danh sách khách hàng
+      ),
+      body: selectedUserId == null
+          ? Center(child: Text('Chọn một người dùng để bắt đầu trò chuyện'))
+          : _buildMessages(),
     );
   }
 }
