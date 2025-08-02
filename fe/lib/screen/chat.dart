@@ -3,6 +3,7 @@ import 'package:socket_io_client/socket_io_client.dart' as IO;
 import 'package:socket_io_client/socket_io_client.dart' show OptionBuilder;
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:intl/intl.dart'; // Thêm ở đầu file nếu chưa có
 
 class ChatPage extends StatefulWidget {
   final Map<String, dynamic>? user;
@@ -30,7 +31,9 @@ class _ChatPageNewState extends State<ChatPage> {
       Future.microtask(() {
         Navigator.pop(context);
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("⚠️ Vui lòng đăng nhập để sử dụng chat")),
+          const SnackBar(
+            content: Text("⚠️ Vui lòng đăng nhập để sử dụng chat"),
+          ),
         );
       });
     } else {
@@ -50,9 +53,26 @@ class _ChatPageNewState extends State<ChatPage> {
     });
 
     socket.on('receiveMessage', (data) {
+      final newMsg = Map<String, dynamic>.from(data);
+      print("📥 Nhận tin nhắn: $newMsg");
+
       setState(() {
-        messages.add(Map<String, dynamic>.from(data));
+        // Nếu là tin nhắn mình vừa gửi → replace tin nhắn tạm bằng bản chuẩn từ server
+        final tempIndex = messages.indexWhere(
+          (msg) =>
+              msg['isTemp'] == true &&
+              msg['message'] == newMsg['message'] &&
+              msg['senderId'] == newMsg['senderId'],
+        );
+        if (tempIndex != -1) {
+          messages[tempIndex] = newMsg; // Replace bản chuẩn
+        } else {
+          // Nếu là tin nhắn mới từ người khác → thêm bình thường
+          bool isDuplicate = messages.any((msg) => msg['_id'] == newMsg['_id']);
+          if (!isDuplicate) messages.add(newMsg);
+        }
       });
+
       _scrollToBottom();
     });
   }
@@ -78,34 +98,30 @@ class _ChatPageNewState extends State<ChatPage> {
   void _sendMessage() async {
     if (_messageController.text.trim().isEmpty) return;
 
-    final msg = {
+    final tempId = DateTime.now().millisecondsSinceEpoch.toString();
+    final tempMsg = {
+      '_id': tempId, // ID tạm để quản lý
       'senderId': widget.user?['_id'],
       'receiverId': adminId,
       'message': _messageController.text.trim(),
       'createdAt': DateTime.now().toIso8601String(),
+      'isTemp': true, // đánh dấu là tin nhắn tạm
     };
 
-    socket.emit('sendMessage', msg);
-
-    try {
-      await http.post(
-        Uri.parse('http://192.168.228.138:5000/api/chat'),
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({
-          'senderId': msg['senderId'],
-          'receiverId': msg['receiverId'],
-          'message': msg['message'],
-        }),
-      );
-    } catch (e) {
-      print('🚨 API Error: $e');
-    }
-
+    // ✅ Hiển thị ngay tin nhắn tạm
     setState(() {
-      messages.add(msg);
+      messages.add(tempMsg);
     });
-    _messageController.clear();
     _scrollToBottom();
+    _messageController.clear();
+
+    // ✅ Gửi socket lên server
+    socket.emit('sendMessage', {
+      'senderId': tempMsg['senderId'],
+      'receiverId': tempMsg['receiverId'],
+      'message': tempMsg['message'],
+      'createdAt': tempMsg['createdAt'],
+    });
   }
 
   void _scrollToBottom() {
@@ -149,12 +165,18 @@ class _ChatPageNewState extends State<ChatPage> {
         ),
         title: Row(
           children: [
-            CircleAvatar(backgroundImage: NetworkImage(adminAvatar), radius: 16),
+            CircleAvatar(
+              backgroundImage: NetworkImage(adminAvatar),
+              radius: 16,
+            ),
             const SizedBox(width: 8),
             Expanded(
               child: Text(
                 adminName,
-                style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
                 overflow: TextOverflow.ellipsis,
               ),
             ),
@@ -171,21 +193,30 @@ class _ChatPageNewState extends State<ChatPage> {
                 final msg = messages[index];
                 final isMe = msg['senderId'] == widget.user?['_id'];
                 final createdAt = msg['createdAt'] != null
-                    ? DateTime.tryParse(msg['createdAt'].toString())
+                    ? DateTime.tryParse(msg['createdAt'].toString())?.toLocal()
                     : null;
 
                 return Align(
-                  alignment: isMe ? Alignment.centerRight : Alignment.centerLeft,
+                  alignment: isMe
+                      ? Alignment.centerRight
+                      : Alignment.centerLeft,
                   child: Container(
-                    margin: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
-                    padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
+                    margin: const EdgeInsets.symmetric(
+                      vertical: 4,
+                      horizontal: 8,
+                    ),
+                    padding: const EdgeInsets.symmetric(
+                      vertical: 10,
+                      horizontal: 12,
+                    ),
                     decoration: BoxDecoration(
                       color: isMe ? Colors.blue : Colors.grey[300],
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Column(
-                      crossAxisAlignment:
-                          isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+                      crossAxisAlignment: isMe
+                          ? CrossAxisAlignment.end
+                          : CrossAxisAlignment.start,
                       children: [
                         Text(
                           msg['message'] ?? '',
@@ -197,7 +228,7 @@ class _ChatPageNewState extends State<ChatPage> {
                         if (createdAt != null) ...[
                           const SizedBox(height: 4),
                           Text(
-                            "${createdAt.hour.toString().padLeft(2, '0')}:${createdAt.minute.toString().padLeft(2, '0')}",
+                            DateFormat('HH:mm dd/MM/yyyy').format(createdAt),
                             style: TextStyle(
                               fontSize: 12,
                               color: isMe ? Colors.white70 : Colors.black54,
@@ -223,7 +254,7 @@ class _ChatPageNewState extends State<ChatPage> {
                     decoration: const InputDecoration(
                       hintText: 'Nhập tin nhắn...',
                       border: InputBorder.none,
-                      contentPadding: EdgeInsets.symmetric(vertical: 15), 
+                      contentPadding: EdgeInsets.symmetric(vertical: 15),
                     ),
                   ),
                 ),

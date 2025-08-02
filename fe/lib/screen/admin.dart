@@ -196,7 +196,6 @@ class _AdminPageState extends State<AdminPage> {
                                 'dd/MM/yyyy',
                               ).format(DateTime.parse(b['date']))
                             : 'Không rõ';
-
                         return Card(
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),

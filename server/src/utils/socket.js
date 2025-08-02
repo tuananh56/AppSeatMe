@@ -1,39 +1,27 @@
-const Chat = require('../models/Chat'); // Đảm bảo đúng đường dẫn
+socket.on('sendMessage', async (data) => {
+  const { senderId, receiverId, message, createdAt } = data;
+  console.log('📩 Tin nhắn nhận được:', data);
 
-io.on('connection', (socket) => {
-  console.log('🟢 New client connected:', socket.id);
+  try {
+    // ✅ Lưu DB
+    const chat = new Chat({
+      senderId,
+      receiverId,
+      message,
+      createdAt: createdAt || new Date(),
+    });
+    await chat.save();
 
-  // Khi người dùng gửi tin nhắn
-  socket.on('sendMessage', async (data) => {
-    const { senderId, receiverId, message, createdAt } = data;
+    console.log('✅ Tin nhắn đã lưu DB:', chat);
 
-    console.log('📩 Tin nhắn nhận được:', data);
-
-    // ✅ Lưu tin nhắn vào DB
-    try {
-      const chat = new Chat({
-        senderId,
-        receiverId,
-        message,
-        createdAt: createdAt || new Date(),
-      });
-      await chat.save();
-      console.log('✅ Tin nhắn đã được lưu vào DB:', chat);
-    } catch (err) {
-      console.error('❌ Lỗi lưu tin nhắn vào DB:', err);
-    }
-
-    // ✅ Gửi lại cho người nhận nếu online
+    // ✅ Emit lại bản chuẩn cho người gửi & người nhận
+    const fullMsg = chat.toObject();
+    io.to(socket.id).emit('receiveMessage', fullMsg); // Người gửi
     const receiverSocketId = userSocketMap[receiverId];
     if (receiverSocketId) {
-      io.to(receiverSocketId).emit('receiveMessage', data);
-    } else {
-      console.warn(`⚠️ Người nhận ${receiverId} chưa online`);
+      io.to(receiverSocketId).emit('receiveMessage', fullMsg); // Người nhận
     }
-  });
-
-  socket.on('disconnect', () => {
-    console.log('🔴 User disconnected:', socket.id);
-    // Loại khỏi userSocketMap nếu cần
-  });
+  } catch (err) {
+    console.error('❌ Lỗi lưu tin nhắn:', err);
+  }
 });

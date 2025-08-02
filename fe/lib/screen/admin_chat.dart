@@ -3,6 +3,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:intl/intl.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
+import 'package:intl/intl.dart'; // Thêm ở đầu file nếu chưa có
 
 class AdminChatScreen extends StatefulWidget {
   const AdminChatScreen({super.key});
@@ -54,12 +55,24 @@ class _AdminChatScreenState extends State<AdminChatScreen> {
     });
 
     socket.on('receiveMessage', (data) {
-      String senderId = data['senderId'];
-      setState(() {
-        userMessages.putIfAbsent(senderId, () => []);
-        userMessages[senderId]!.add(data);
-        selectedUserId ??= senderId;
-      });
+      final newMsg = Map<String, dynamic>.from(data);
+
+      // ✅ Kiểm tra tin nhắn trùng
+      bool isDuplicate =
+          userMessages[newMsg['senderId']]?.any(
+            (msg) =>
+                msg['message'] == newMsg['message'] &&
+                msg['senderId'] == newMsg['senderId'] &&
+                msg['createdAt'] == newMsg['createdAt'],
+          ) ??
+          false;
+
+      if (!isDuplicate) {
+        setState(() {
+          userMessages.putIfAbsent(newMsg['senderId'], () => []);
+          userMessages[newMsg['senderId']]!.add(newMsg);
+        });
+      }
     });
 
     socket.onDisconnect((_) => print('Socket disconnected'));
@@ -74,13 +87,19 @@ class _AdminChatScreenState extends State<AdminChatScreen> {
       if (res.statusCode == 200) {
         final List<dynamic> data = jsonDecode(res.body);
 
-        // Duyệt qua từng user trong danh sách trả về
+        // ✅ Xoá dữ liệu cũ trước khi load mới
+        setState(() {
+          userMessages.clear();
+          userNames.clear();
+          userAvatars.clear();
+        });
+
+        // ✅ Duyệt qua từng user trong danh sách trả về
         for (var item in data) {
           final String userId = item['userId'];
           final Map<String, dynamic> userInfo = item['userInfo'] ?? {};
           final List<dynamic> messages = List.from(item['messages'] ?? []);
 
-          // Lưu tin nhắn, tên, avatar
           userMessages[userId] = messages;
           userNames[userId] = userInfo['name'] ?? 'Ẩn danh';
           userAvatars[userId] =
@@ -90,7 +109,7 @@ class _AdminChatScreenState extends State<AdminChatScreen> {
               : '';
         }
 
-        // Auto chọn user đầu tiên
+        // ✅ Auto chọn user đầu tiên
         if (data.isNotEmpty) {
           setState(() {
             selectedUserId = data.first['userId'];
@@ -135,22 +154,25 @@ class _AdminChatScreenState extends State<AdminChatScreen> {
       'senderId': adminId,
       'receiverId': selectedUserId,
       'message': text,
-      'timestamp': DateTime.now().toIso8601String(),
+      'createdAt': DateTime.now()
+          .toIso8601String(), // ⚠ Đổi "timestamp" thành "createdAt" cho đồng bộ với BE
     };
 
+    // Gửi qua socket
     socket.emit('sendMessage', message);
 
+    // Thêm ngay vào UI
     setState(() {
       userMessages[selectedUserId]!.add(message);
       _messageController.clear();
     });
 
-    // Scroll to bottom
-    Future.delayed(Duration(milliseconds: 100), () {
+    // Tự động scroll xuống cuối
+    Future.delayed(const Duration(milliseconds: 100), () {
       if (_scrollController.hasClients) {
         _scrollController.animateTo(
           _scrollController.position.maxScrollExtent,
-          duration: Duration(milliseconds: 300),
+          duration: const Duration(milliseconds: 300),
           curve: Curves.easeOut,
         );
       }
@@ -224,7 +246,25 @@ class _AdminChatScreenState extends State<AdminChatScreen> {
   }
 
   Widget _buildMessages() {
-    final messages = userMessages[selectedUserId] ?? [];
+    // Copy danh sách tin nhắn để tránh thay đổi trực tiếp dữ liệu gốc
+    final messages = [...(userMessages[selectedUserId] ?? [])];
+
+    // 🔥 Sắp xếp tin nhắn theo thời gian (cũ -> mới)
+    messages.sort((a, b) {
+      final timeA =
+          DateTime.tryParse(a['createdAt'] ?? a['timestamp'] ?? '') ??
+          DateTime.now();
+      final timeB =
+          DateTime.tryParse(b['createdAt'] ?? b['timestamp'] ?? '') ??
+          DateTime.now();
+      return timeA.compareTo(timeB); // tăng dần
+    });
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_scrollController.hasClients) {
+        _scrollController.jumpTo(_scrollController.position.maxScrollExtent);
+      }
+    });
 
     return Container(
       color: Colors.white,
@@ -238,12 +278,14 @@ class _AdminChatScreenState extends State<AdminChatScreen> {
               itemBuilder: (context, index) {
                 final msg = messages[index];
                 final isMe = msg['senderId'] == adminId;
-                final time = DateFormat('HH:mm').format(
-                  DateTime.tryParse(
-                        msg['createdAt'] ?? msg['timestamp'] ?? '',
-                      ) ??
-                      DateTime.now(),
-                );
+
+                final dateTime = DateTime.tryParse(
+                  msg['createdAt'] ?? msg['timestamp'] ?? '',
+                )?.toLocal(); // ✅ Đổi sang giờ local
+
+                final time = dateTime != null
+                    ? DateFormat('HH:mm').format(dateTime)
+                    : '';
 
                 return Align(
                   alignment: isMe
