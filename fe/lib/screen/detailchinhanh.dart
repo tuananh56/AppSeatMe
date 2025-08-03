@@ -71,35 +71,36 @@ class _DetailChiNhanhPageState extends State<DetailChiNhanhPage> {
   }
 
   Future<void> _checkLoggedInAndNavigate() async {
+    final prefs = await SharedPreferences.getInstance(); // ✅ Lấy prefs mới nhất
     final userJson = prefs.getString('user');
 
     if (userJson == null) {
-      // Chưa đăng nhập → hỏi người dùng
+      // ✅ Hiện popup yêu cầu đăng nhập giống account.dart
       showDialog(
         context: context,
         builder: (context) => AlertDialog(
-          title: const Text("Bạn chưa đăng nhập"),
-          content: const Text("Vui lòng đăng nhập để đặt bàn."),
+          title: const Text('Yêu cầu đăng nhập'),
+          content: const Text('Vui lòng đăng nhập để đặt bàn.'),
           actions: [
             TextButton(
-              onPressed: () => Navigator.pop(context), // Hủy
-              child: const Text("Hủy"),
+              onPressed: () => Navigator.pop(context), // Đóng dialog
+              child: const Text('Hủy'),
             ),
-            TextButton(
+            ElevatedButton(
               onPressed: () {
-                Navigator.pop(context); // đóng dialog
+                Navigator.pop(context); // Đóng dialog
                 Navigator.push(
                   context,
                   MaterialPageRoute(builder: (context) => const LoginPage()),
                 );
               },
-              child: const Text("Đồng ý"),
+              child: const Text('Đăng nhập'),
             ),
           ],
         ),
       );
     } else {
-      // Đã đăng nhập → chuyển qua trang Order
+      // ✅ Đã đăng nhập → sang trang đặt bàn
       Navigator.push(
         context,
         MaterialPageRoute(
@@ -311,7 +312,6 @@ class _DetailChiNhanhPageState extends State<DetailChiNhanhPage> {
                         const SizedBox(height: 16),
                         GestureDetector(
                           onTap: _checkLoggedInAndNavigate,
-
                           child: Container(
                             width: double.infinity,
                             padding: const EdgeInsets.symmetric(vertical: 14),

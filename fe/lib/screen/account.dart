@@ -1,11 +1,11 @@
 // account.dart
+import 'package:app_dat_ban/screen/chat.dart';
 import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:app_dat_ban/screen/login.dart';
 import 'package:app_dat_ban/screen/booking_history.dart';
 import 'package:app_dat_ban/screen/like_chua.dart';
-import 'chat_page.dart';
 import 'package:app_dat_ban/screen/edit_profile.dart';
 import 'package:app_dat_ban/screen/admin_chat.dart';
 
@@ -124,14 +124,20 @@ class _AccountPageState extends State<AccountPage> {
             ),
           ),
           child: AppBar(
-            title: const Text("Tài khoản"),
+            title: const Text(
+              "Tài khoản",
+              style: TextStyle(
+                fontWeight: FontWeight.bold, // ✅ Đặt font đậm ở đây
+                color: Colors.white,
+              ),
+            ),
+            centerTitle: true,
             backgroundColor: Colors.transparent, // transparent để lộ gradient
             elevation: 0,
             foregroundColor: Colors.white,
           ),
         ),
       ),
-
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -187,7 +193,7 @@ class _AccountPageState extends State<AccountPage> {
             if (_user != null && _user!['role'] == 'admin')
               _buildMenuTile(
                 Icons.admin_panel_settings,
-                'Chat với khách hàng',
+                'Hỗ trợ khách hàng',
                 () {
                   Navigator.push(
                     context,
@@ -196,21 +202,19 @@ class _AccountPageState extends State<AccountPage> {
                 },
               ),
             // Danh sách chức năng
-            _buildMenuTile(
-              Icons.chat_bubble_outline,
-              'Trò chuyện với nhà hàng',
-              () {
+            _buildMenuTile(Icons.support_agent, 'Liên hệ hỗ trợ', () {
+              if (_user != null) {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (_) => const QRPage()),
+                  MaterialPageRoute(
+                    builder: (_) =>
+                        ChatPage(user: _user), // 👉 Truyền user sang ChatPage
+                  ),
                 );
-              },
-            ),
-            _buildMenuTile(
-              Icons.history,
-              'Lịch sử đặt bàn',
-              _goToBookingHistory,
-            ),
+              } else {
+                _showLoginRequiredDialog(); // Nếu chưa đăng nhập thì yêu cầu đăng nhập
+              }
+            }),
             _buildMenuTile(Icons.edit, 'Chỉnh sửa thông tin', () {
               if (_user != null) {
                 Navigator.push(
@@ -223,6 +227,11 @@ class _AccountPageState extends State<AccountPage> {
                 });
               }
             }),
+            _buildMenuTile(
+              Icons.history,
+              'Lịch sử đặt bàn',
+              _goToBookingHistory,
+            ),
             _buildMenuTile(Icons.favorite_border, 'Yêu thích', () {
               if (_user != null && _user!['_id'] != null) {
                 Navigator.push(
@@ -334,21 +343,20 @@ class _AccountPageState extends State<AccountPage> {
                     );
                   }
                 }),
-
-                _buildMenuItem(
-                  Icons.chat_bubble_outline,
-                  'Trò chuyện với nhà hàng',
-                  () {
-                    if (_user == null) {
-                      _showLoginRequiredDialog();
-                    } else {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (_) => const QRPage()),
-                      );
-                    }
-                  },
-                ),
+                _buildMenuTile(Icons.support_agent, 'Liên hệ hỗ trợ', () {
+                  if (_user != null) {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => ChatPage(
+                          user: _user,
+                        ), // 👉 Truyền user sang ChatPage
+                      ),
+                    );
+                  } else {
+                    _showLoginRequiredDialog(); // Nếu chưa đăng nhập thì yêu cầu đăng nhập
+                  }
+                }),
               ],
             ),
           ),

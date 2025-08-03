@@ -1,3 +1,4 @@
+import 'package:app_dat_ban/screen/login.dart';
 import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
@@ -13,8 +14,9 @@ import 'package:app_dat_ban/screen/admin.dart' as admin;
 
 class HomePage extends StatefulWidget {
   final Map<String, dynamic>? user;
+  final int initialIndex;
 
-  const HomePage({super.key, this.user});
+  const HomePage({super.key, this.user, this.initialIndex = 0});
 
   @override
   State<HomePage> createState() => _HomePageState();
@@ -28,6 +30,7 @@ class _HomePageState extends State<HomePage> {
   void initState() {
     super.initState();
     _user = widget.user;
+    _selectedIndex = widget.initialIndex;
   }
 
   List<Widget> _buildPages() {
@@ -198,7 +201,7 @@ class _HomeContentState extends State<HomeContent> {
             _buildSectionHeader('Chi nhánh nhà hàng'),
             const SizedBox(height: 16),
             _buildBranchList(),
-            const SizedBox(height: 12),
+            const SizedBox(height: 13),
             _buildSectionHeader('Ưu đãi cực HOT'),
             const SizedBox(height: 16),
             _buildDealsList(),
@@ -207,14 +210,43 @@ class _HomeContentState extends State<HomeContent> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (_) => ChatPage(user: widget.user), // 👈 Truyền user
-            ),
-          );
+          if (widget.user == null) {
+            // ✅ Hiển thị AlertDialog nếu chưa đăng nhập
+            showDialog(
+              context: context,
+              builder: (context) => AlertDialog(
+                title: const Text('Thông báo'),
+                content: const Text('Vui lòng đăng nhập để sử dụng chat'),
+                actions: [
+                  TextButton(
+                    onPressed: () => Navigator.pop(context),
+                    child: const Text('Đóng'),
+                  ),
+                  TextButton(
+                    onPressed: () {
+                      Navigator.pop(context); // Đóng dialog
+                      // 👉 Chuyển sang màn hình Login
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const LoginPage(),
+                        ),
+                      );
+                    },
+                    child: const Text('Đăng nhập'),
+                  ),
+                ],
+              ),
+            );
+          } else {
+            // ✅ Nếu đã đăng nhập thì mở chat
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => ChatPage(user: widget.user)),
+            );
+          }
         },
-        backgroundColor: Colors.blue,
+        backgroundColor: const Color.fromARGB(255, 227, 14, 14),
         child: const Icon(Icons.chat, color: Colors.white),
       ),
     );
@@ -228,7 +260,7 @@ class _HomeContentState extends State<HomeContent> {
           Expanded(
             child: Text(
               title,
-              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
               overflow: TextOverflow.ellipsis,
               maxLines: 1,
             ),
@@ -341,12 +373,12 @@ class _HomeContentState extends State<HomeContent> {
                 ),
               ],
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 6),
             // 🔥 Chỉ giữ Text ở dưới cùng
             Text(
               'Đặt bàn giữ chỗ',
               style: TextStyle(
-                fontSize: 14,
+                fontSize: 18,
                 color: Colors.red[700],
                 fontWeight: FontWeight.bold,
               ),
@@ -356,6 +388,7 @@ class _HomeContentState extends State<HomeContent> {
       ),
     );
   }
+
   Widget _buildDealsList() {
     if (_isLoadingDeals) {
       return const Center(child: CircularProgressIndicator());

@@ -21,7 +21,7 @@ class MorePage extends StatelessWidget {
             ),
             child: const Center(
               child: Text(
-                "Thêm",
+                "Thông tin ứng dụng",
                 style: TextStyle(
                   color: Colors.white,
                   fontSize: 20,

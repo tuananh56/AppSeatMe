@@ -40,11 +40,25 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
       return;
     }
 
+    // 🔥 Kiểm tra mật khẩu mạnh
     if (newPassword.length < 6) {
-      _showMessage("❗ Mật khẩu phải từ 6 ký tự");
+      _showMessage("❗ Mật khẩu phải có ít nhất 6 ký tự");
+      return;
+    }
+    if (!RegExp(r'[A-Z]').hasMatch(newPassword)) {
+      _showMessage("❗ Mật khẩu phải chứa ít nhất 1 chữ in hoa (A-Z)");
+      return;
+    }
+    if (!RegExp(r'[a-z]').hasMatch(newPassword)) {
+      _showMessage("❗ Mật khẩu phải chứa ít nhất 1 chữ thường (a-z)");
+      return;
+    }
+    if (!RegExp(r'[!@#\$%^&*(),.?":{}|<>]').hasMatch(newPassword)) {
+      _showMessage("❗ Mật khẩu phải chứa ít nhất 1 ký tự đặc biệt");
       return;
     }
 
+    // 🔑 Kiểm tra mật khẩu xác nhận
     if (newPassword != confirmPassword) {
       _showMessage("❗ Mật khẩu xác nhận không khớp");
       return;

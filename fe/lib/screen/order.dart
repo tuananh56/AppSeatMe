@@ -222,22 +222,19 @@ class _OrderPageState extends State<OrderPage> {
               ),
             ),
             customInputField(
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  // Nhóm: chữ "Số bàn" + - số +
-                  Row(
+              child: TextField(
+                readOnly: true, // Không cho nhập trực tiếp
+                decoration: InputDecoration(
+                  border: InputBorder.none,
+                  labelText: 'Số bàn',
+                  suffixIcon: Row(
+                    mainAxisSize: MainAxisSize.min,
                     children: [
-                      const Text(
-                        'Số bàn:',
-                        style: TextStyle(
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                      const SizedBox(width: 6),
                       IconButton(
-                        icon: const Icon(Icons.remove_circle_outline),
-                        color: Colors.red,
+                        icon: const Icon(
+                          Icons.remove_circle_outline,
+                          color: Colors.red,
+                        ),
                         onPressed: () => setState(() {
                           if (soGhe > 1) soGhe--;
                         }),
@@ -250,19 +247,22 @@ class _OrderPageState extends State<OrderPage> {
                         ),
                       ),
                       IconButton(
-                        icon: const Icon(Icons.add_circle_outline),
-                        color: Colors.red,
+                        icon: const Icon(
+                          Icons.add_circle_outline,
+                          color: Colors.red,
+                        ),
                         onPressed: () => setState(() => soGhe++),
                       ),
+                      const Icon(
+                        Icons.table_bar,
+                        color: Colors.red,
+                      ), // ✅ icon bàn thẳng hàng
+                      const SizedBox(width: 8),
                     ],
                   ),
-
-                  // Icon bàn nằm bên phải
-                  const Icon(Icons.table_bar, color: Colors.red),
-                ],
+                ),
               ),
             ),
-
             customInputField(
               child: InkWell(
                 onTap: () async {

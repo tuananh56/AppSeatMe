@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'nearyou.dart';
+import 'home.dart';
+import 'search.dart';
+import 'account.dart';
 import 'package:intl/intl.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 import 'package:intl/intl.dart'; // Thêm ở đầu file nếu chưa có
@@ -326,39 +330,54 @@ class _AdminChatScreenState extends State<AdminChatScreen> {
               },
             ),
           ),
-          Divider(height: 1),
-          Container(
-            margin: const EdgeInsets.only(bottom: 10),
-            padding: EdgeInsets.all(10),
-            color: Colors.grey[50],
-            child: Row(
-              children: [
-                Expanded(
-                  child: Container(
-                    padding: EdgeInsets.symmetric(horizontal: 16),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(30),
-                      border: Border.all(color: Colors.grey[300]!),
-                    ),
+          SafeArea(
+            child: Container(
+              margin: const EdgeInsets.all(8),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(30),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black12,
+                    blurRadius: 4,
+                    offset: Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: Row(
+                children: [
+                  Expanded(
                     child: TextField(
                       controller: _messageController,
-                      decoration: InputDecoration(
-                        border: InputBorder.none,
+                      decoration: const InputDecoration(
                         hintText: 'Nhập tin nhắn...',
+                        border: InputBorder.none,
                       ),
                     ),
                   ),
-                ),
-                SizedBox(width: 8),
-                CircleAvatar(
-                  backgroundColor: Colors.blue,
-                  child: IconButton(
-                    icon: Icon(Icons.send, color: Colors.white),
-                    onPressed: _sendMessage,
+                  const SizedBox(width: 6),
+                  GestureDetector(
+                    onTap: _sendMessage,
+                    child: Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: const BoxDecoration(
+                        shape: BoxShape.circle,
+                        gradient: LinearGradient(
+                          colors: [Color(0xFF004AAD), Color(0xFF00CFFF)],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                        ),
+                      ),
+                      child: const Icon(
+                        Icons.send,
+                        color: Colors.white,
+                        size: 20,
+                      ),
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ],
@@ -421,6 +440,72 @@ class _AdminChatScreenState extends State<AdminChatScreen> {
       body: selectedUserId == null
           ? Center(child: Text('Chọn một người dùng để bắt đầu trò chuyện'))
           : _buildMessages(),
+
+      bottomNavigationBar: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            colors: [Color(0xFF6E0000), Color(0xFFFF2323)],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+        ),
+        child: BottomNavigationBar(
+          backgroundColor: Colors.transparent,
+          items: const [
+            BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Trang chủ'),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.location_pin),
+              label: 'Gần bạn',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.search),
+              label: 'Tìm kiếm',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.person_outline),
+              label: 'Tài khoản',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.admin_panel_settings),
+              label: 'Quản trị',
+            ),
+          ],
+          currentIndex: 4, // Tab mặc định cho Admin
+          selectedItemColor: Colors.white,
+          unselectedItemColor: Colors.black,
+          onTap: (index) {
+            if (index == 0) {
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => HomePage(user: null),
+                ), // 👈 truyền user nếu có
+              );
+            } else if (index == 1) {
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (_) => const NearYouPage()),
+              );
+            } else if (index == 2) {
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (_) => const SearchPage()),
+              );
+            } else if (index == 3) {
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (_) => const AccountPage()),
+              );
+            } else if (index == 4) {
+              // đang ở admin thì không làm gì
+            }
+          },
+
+          type: BottomNavigationBarType.fixed,
+          showUnselectedLabels: true,
+          elevation: 0,
+        ),
+      ),
     );
   }
 }

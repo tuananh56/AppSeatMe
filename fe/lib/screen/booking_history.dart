@@ -2,6 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:intl/intl.dart';
+import 'package:app_dat_ban/screen/home.dart';
+import 'package:app_dat_ban/screen/nearyou.dart';
+import 'package:app_dat_ban/screen/search.dart';
+import 'package:app_dat_ban/screen/account.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class BookingHistoryPage extends StatefulWidget {
@@ -164,7 +168,7 @@ class _BookingHistoryPageState extends State<BookingHistoryPage> {
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        title: null, // Giữ nguyên null
+        title: null,
         centerTitle: true,
         flexibleSpace: Container(
           decoration: const BoxDecoration(
@@ -174,8 +178,7 @@ class _BookingHistoryPageState extends State<BookingHistoryPage> {
               end: Alignment.bottomRight,
             ),
           ),
-          child: Center(
-          ),
+          child: const Center(),
         ),
         actions: [
           DropdownButtonHideUnderline(
@@ -309,6 +312,73 @@ class _BookingHistoryPageState extends State<BookingHistoryPage> {
                   ),
               ],
             ),
+
+      // 🔽 BOTTOM NAVIGATION BAR
+      bottomNavigationBar: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            colors: [Color(0xFF6E0000), Color(0xFFFF2323)],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+        ),
+        child: BottomNavigationBar(
+          backgroundColor: Colors.transparent,
+          items: const [
+            BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Trang chủ'),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.location_pin),
+              label: 'Gần bạn',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.search),
+              label: 'Tìm kiếm',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.person_outline),
+              label: 'Tài khoản',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.admin_panel_settings),
+              label: 'Quản trị',
+            ),
+          ],
+          currentIndex: 4, // Tab mặc định cho Admin
+          selectedItemColor: Colors.white,
+          unselectedItemColor: Colors.black,
+          onTap: (index) {
+            if (index == 0) {
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => HomePage(user: null),
+                ), // 👈 truyền user nếu có
+              );
+            } else if (index == 1) {
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (_) => const NearYouPage()),
+              );
+            } else if (index == 2) {
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (_) => const SearchPage()),
+              );
+            } else if (index == 3) {
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (_) => const AccountPage()),
+              );
+            } else if (index == 4) {
+              // đang ở admin thì không làm gì
+            }
+          },
+
+          type: BottomNavigationBarType.fixed,
+          showUnselectedLabels: true,
+          elevation: 0,
+        ),
+      ),
     );
   }
 }

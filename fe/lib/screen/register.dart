@@ -39,8 +39,33 @@ class _RegisterPageState extends State<RegisterPage> {
     final confirmPassword = _confirmPasswordController.text.trim();
     final phone = _phoneController.text.trim();
 
-    if ([name, email, password, confirmPassword, phone].any((e) => e.isEmpty) || _selectedImage == null) {
+    if ([name, email, password, confirmPassword, phone].any((e) => e.isEmpty) ||
+        _selectedImage == null) {
       _showMessage('❗ Vui lòng điền đầy đủ thông tin và chọn ảnh đại diện');
+      return;
+    }
+
+    // ✅ Kiểm tra độ dài mật khẩu
+    if (password.length < 6) {
+      _showMessage('❗ Mật khẩu phải có ít nhất 6 ký tự');
+      return;
+    }
+
+    // ✅ Kiểm tra chữ in hoa
+    if (!RegExp(r'[A-Z]').hasMatch(password)) {
+      _showMessage('❗ Mật khẩu phải chứa ít nhất 1 chữ in hoa (A-Z)');
+      return;
+    }
+
+    // ✅ Kiểm tra chữ thường
+    if (!RegExp(r'[a-z]').hasMatch(password)) {
+      _showMessage('❗ Mật khẩu phải chứa ít nhất 1 chữ thường (a-z)');
+      return;
+    }
+
+    // ✅ Kiểm tra ký tự đặc biệt
+    if (!RegExp(r'[!@#\$%^&*(),.?":{}|<>]').hasMatch(password)) {
+      _showMessage('❗ Mật khẩu phải chứa ít nhất 1 ký tự đặc biệt');
       return;
     }
 
@@ -64,16 +89,19 @@ class _RegisterPageState extends State<RegisterPage> {
 
     if (error == null) {
       _showMessage(' Đăng ký thành công', bgColor: Colors.green);
-      Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const LoginPage()));
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (_) => const LoginPage()),
+      );
     } else {
       _showMessage(error);
     }
   }
 
   void _showMessage(String msg, {Color bgColor = Colors.red}) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(msg), backgroundColor: bgColor),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(msg), backgroundColor: bgColor));
   }
 
   Widget _buildInputField({
@@ -117,7 +145,9 @@ class _RegisterPageState extends State<RegisterPage> {
             child: CircleAvatar(
               radius: 50,
               backgroundColor: Colors.grey[200],
-              backgroundImage: _selectedImage != null ? FileImage(_selectedImage!) : null,
+              backgroundImage: _selectedImage != null
+                  ? FileImage(_selectedImage!)
+                  : null,
               child: _selectedImage == null
                   ? const Icon(Icons.add_a_photo, size: 32, color: Colors.grey)
                   : null,
@@ -126,7 +156,10 @@ class _RegisterPageState extends State<RegisterPage> {
           const SizedBox(height: 8),
           TextButton(
             onPressed: _pickImage,
-            child: const Text('Chọn ảnh đại diện', style: TextStyle(color: Colors.grey)),
+            child: const Text(
+              'Chọn ảnh đại diện',
+              style: TextStyle(color: Colors.grey),
+            ),
           ),
         ],
       ),
@@ -179,11 +212,18 @@ class _RegisterPageState extends State<RegisterPage> {
               ? const SizedBox(
                   height: 20,
                   width: 20,
-                  child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                  child: CircularProgressIndicator(
+                    color: Colors.white,
+                    strokeWidth: 2,
+                  ),
                 )
               : const Text(
                   'Đăng ký',
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white),
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
                 ),
         ),
       ),
@@ -194,10 +234,19 @@ class _RegisterPageState extends State<RegisterPage> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        const Text("Bạn đã có tài khoản? ", style: TextStyle(color: Colors.grey)),
+        const Text(
+          "Bạn đã có tài khoản? ",
+          style: TextStyle(color: Colors.grey),
+        ),
         GestureDetector(
-          onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const LoginPage())),
-          child: const Text('Đăng nhập', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black)),
+          onTap: () => Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => const LoginPage()),
+          ),
+          child: const Text(
+            'Đăng nhập',
+            style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black),
+          ),
         ),
       ],
     );
@@ -246,22 +295,35 @@ class _RegisterPageState extends State<RegisterPage> {
                     ],
                   ),
                   child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 30.0, vertical: 40.0),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 30.0,
+                      vertical: 40.0,
+                    ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
                         _buildLogo(),
                         const SizedBox(height: 30),
-                        _buildInputField(icon: Icons.person, label: 'Họ tên', controller: _nameController),
+                        _buildInputField(
+                          icon: Icons.person,
+                          label: 'Họ tên',
+                          controller: _nameController,
+                        ),
                         const SizedBox(height: 20),
-                        _buildInputField(icon: Icons.email, label: 'Email', controller: _emailController),
+                        _buildInputField(
+                          icon: Icons.email,
+                          label: 'Email',
+                          controller: _emailController,
+                        ),
                         const SizedBox(height: 20),
                         _buildInputField(
                           icon: Icons.lock,
                           label: 'Mật khẩu',
                           controller: _passwordController,
                           obscureText: _obscurePassword,
-                          toggleObscure: () => setState(() => _obscurePassword = !_obscurePassword),
+                          toggleObscure: () => setState(
+                            () => _obscurePassword = !_obscurePassword,
+                          ),
                         ),
                         const SizedBox(height: 20),
                         _buildInputField(
@@ -269,7 +331,10 @@ class _RegisterPageState extends State<RegisterPage> {
                           label: 'Xác nhận mật khẩu',
                           controller: _confirmPasswordController,
                           obscureText: _obscureConfirmPassword,
-                          toggleObscure: () => setState(() => _obscureConfirmPassword = !_obscureConfirmPassword),
+                          toggleObscure: () => setState(
+                            () => _obscureConfirmPassword =
+                                !_obscureConfirmPassword,
+                          ),
                         ),
                         const SizedBox(height: 20),
                         _buildInputField(

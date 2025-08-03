@@ -63,7 +63,10 @@ class _NearYouPageState extends State<NearYouPage> {
         title: const Text('Lỗi'),
         content: Text(message),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context), child: const Text('OK'))
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('OK'),
+          ),
         ],
       ),
     );
@@ -73,20 +76,34 @@ class _NearYouPageState extends State<NearYouPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        leading: BackButton(color: Colors.black),
+        leading: const BackButton(
+          color: Colors.white,
+        ), // Nút quay lại màu trắng
         elevation: 0,
-        backgroundColor: Colors.white,
+        centerTitle: true, // ✅ Tiêu đề ở giữa
         title: const Text(
           'Chi nhánh gần bạn',
-          style: TextStyle(color: Colors.black),
+          style: TextStyle(
+            color: Colors.white, // Tiêu đề màu trắng
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        flexibleSpace: Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              colors: [Color(0xFF6E0000), Color(0xFFFF2323)], // Gradient đỏ
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+            ),
+          ),
         ),
       ),
       backgroundColor: Colors.white,
       body: _loading
           ? const Center(child: CircularProgressIndicator())
           : _branches.isEmpty
-              ? _buildRequestView()
-              : _buildBranchListView(),
+          ? _buildRequestView()
+          : _buildBranchListView(),
     );
   }
 
@@ -104,11 +121,7 @@ class _NearYouPageState extends State<NearYouPage> {
                 color: Color(0xFFE0E0E0),
                 shape: BoxShape.circle,
               ),
-              child: const Icon(
-                Icons.location_on,
-                size: 50,
-                color: Colors.red,
-              ),
+              child: const Icon(Icons.location_on, size: 50, color: Colors.red),
             ),
             const SizedBox(height: 20),
             const Text(
@@ -150,7 +163,8 @@ class _NearYouPageState extends State<NearYouPage> {
           onTap: () {
             Navigator.push(
               context,
-              MaterialPageRoute(/*đây */
+              MaterialPageRoute(
+                /*đây */
                 builder: (context) => DetailChiNhanhPage(
                   id: branch['_id'],
                   imagePath: 'assets/imgChiNhanh/${branch['image']}',
@@ -162,7 +176,9 @@ class _NearYouPageState extends State<NearYouPage> {
           },
           child: Card(
             margin: const EdgeInsets.symmetric(vertical: 8),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
             elevation: 4,
             child: Padding(
               padding: const EdgeInsets.all(12.0),
@@ -206,7 +222,7 @@ class _NearYouPageState extends State<NearYouPage> {
                         ),
                       ],
                     ),
-                  )
+                  ),
                 ],
               ),
             ),
