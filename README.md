@@ -1,3 +1,3 @@
-Hồ Tuấn Anh_22DH114432_Huflit_CNPM
-Mới tập code app bằng flutter, nodejs, mongodb
+Hồ Tuấn Anh_22DH114432_Huflit_CNPM \n
+Mới tập code app bằng flutter, nodejs, mongodb \n
 Tài liệu: ChatGPT, Youtube...
