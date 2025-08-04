@@ -85,7 +85,14 @@ class _OrderPageState extends State<OrderPage> {
 
       if (response.statusCode == 201) {
         final booking = jsonDecode(response.body)['booking'];
-        final arriveDate = DateTime.parse(booking['date']);
+        final arriveDate = DateTime(
+          selectedDate!.year,
+          selectedDate!.month,
+          selectedDate!.day,
+          selectedTime!.hour,
+          selectedTime!.minute,
+        );
+
         final bookingId = booking['_id'];
 
         Navigator.push(

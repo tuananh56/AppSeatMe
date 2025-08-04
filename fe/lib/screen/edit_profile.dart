@@ -189,7 +189,6 @@ class _EditProfilePageState extends State<EditProfilePage> {
     return Scaffold(
       appBar: AppBar(
         elevation: 0,
-        title: const Text('Chỉnh sửa hồ sơ'),
         centerTitle: true,
         backgroundColor: Colors.transparent,
         flexibleSpace: Container(
@@ -202,7 +201,15 @@ class _EditProfilePageState extends State<EditProfilePage> {
           ),
         ),
         foregroundColor: Colors.white,
+        title: const Text(
+          'Chỉnh sửa hồ sơ',
+          style: TextStyle(
+            fontWeight: FontWeight.bold, // 👈 Làm chữ đậm
+            fontSize: 20, // 👈 (Tuỳ chọn) tăng kích thước nếu cần
+          ),
+        ),
       ),
+
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
         child: Column(

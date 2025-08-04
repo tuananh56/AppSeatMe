@@ -251,7 +251,10 @@ class _PaymentState extends State<Payment> with SingleTickerProviderStateMixin {
         elevation: 0,
         title: const Text(
           "Thông tin đặt bàn",
-          style: TextStyle(color: Colors.white),
+          style: TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.bold, // 👈 Làm chữ đậm
+          ),
         ),
         centerTitle: true,
         leading: IconButton(

@@ -229,42 +229,44 @@ class _ChatPageNewState extends State<ChatPage> {
                   alignment: isMe
                       ? Alignment.centerRight
                       : Alignment.centerLeft,
-                  child: Container(
-                    margin: const EdgeInsets.symmetric(
-                      vertical: 4,
-                      horizontal: 8,
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(
+                      maxWidth:
+                          MediaQuery.of(context).size.width *
+                          0.7, // Giới hạn chiều rộng
                     ),
-                    padding: const EdgeInsets.symmetric(
-                      vertical: 10,
-                      horizontal: 12,
-                    ),
-                    decoration: BoxDecoration(
-                      color: isMe ? Colors.blue : Colors.grey[300],
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: isMe
-                          ? CrossAxisAlignment.end
-                          : CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          msg['message'] ?? '',
-                          style: TextStyle(
-                            color: isMe ? Colors.white : Colors.black,
-                            fontSize: 16,
-                          ),
+                    child: Container(
+                      margin: const EdgeInsets.symmetric(
+                        vertical: 4,
+                        horizontal: 8,
+                      ),
+                      padding: const EdgeInsets.symmetric(
+                        vertical: 8,
+                        horizontal: 10,
+                      ),
+                      decoration: BoxDecoration(
+                        color: isMe ? Colors.blue : Colors.grey[200],
+                        borderRadius: BorderRadius.only(
+                          topLeft: const Radius.circular(12),
+                          topRight: const Radius.circular(12),
+                          bottomLeft: Radius.circular(isMe ? 12 : 0),
+                          bottomRight: Radius.circular(isMe ? 0 : 12),
                         ),
-                        if (createdAt != null) ...[
-                          const SizedBox(height: 4),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: isMe
+                            ? CrossAxisAlignment.end
+                            : CrossAxisAlignment.start,
+                        children: [
                           Text(
-                            DateFormat('HH:mm dd/MM/yyyy').format(createdAt),
+                            msg['message'] ?? '',
                             style: TextStyle(
-                              fontSize: 12,
-                              color: isMe ? Colors.white70 : Colors.black54,
+                              color: isMe ? Colors.white : Colors.black,
+                              fontSize: 14, // Gọn hơn
                             ),
                           ),
                         ],
-                      ],
+                      ),
                     ),
                   ),
                 );
