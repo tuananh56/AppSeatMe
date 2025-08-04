@@ -21,6 +21,10 @@ class _AdminChatScreenState extends State<AdminChatScreen> {
   String adminId = '686bfd52d27d660c25c71c2c'; // ID cố định của admin
   String? selectedUserId;
 
+  bool isSameDay(DateTime a, DateTime b) {
+    return a.year == b.year && a.month == b.month && a.day == b.day;
+  }
+
   Map<String, List<dynamic>> userMessages = {}; // userId -> list of messages
   Map<String, String> userAvatars = {}; // userId -> avatar URL
   Map<String, String> userNames = {}; // userId -> name
@@ -125,7 +129,7 @@ class _AdminChatScreenState extends State<AdminChatScreen> {
     }
   }
 
- /* Future<void> _fetchUserAvatar(String userId) async {
+  /* Future<void> _fetchUserAvatar(String userId) async {
     if (userAvatars.containsKey(userId)) return;
 
     try {
@@ -283,49 +287,83 @@ class _AdminChatScreenState extends State<AdminChatScreen> {
                 final msg = messages[index];
                 final isMe = msg['senderId'] == adminId;
 
-                final dateTime = DateTime.tryParse(
-                  msg['createdAt'] ?? msg['timestamp'] ?? '',
-                )?.toLocal(); // ✅ Đổi sang giờ local
+                final dateTime =
+                    DateTime.tryParse(
+                      msg['createdAt'] ?? msg['timestamp'] ?? '',
+                    )?.toLocal() ??
+                    DateTime.now();
 
-                final time = dateTime != null
-                    ? DateFormat('HH:mm').format(dateTime)
-                    : '';
+                final previousMsg = index > 0 ? messages[index - 1] : null;
+                final previousDate = previousMsg != null
+                    ? DateTime.tryParse(
+                        previousMsg['createdAt'] ??
+                            previousMsg['timestamp'] ??
+                            '',
+                      )?.toLocal()
+                    : null;
 
-                return Align(
-                  alignment: isMe
-                      ? Alignment.centerRight
-                      : Alignment.centerLeft,
-                  child: Container(
-                    margin: EdgeInsets.symmetric(vertical: 6),
-                    padding: EdgeInsets.symmetric(vertical: 10, horizontal: 14),
-                    constraints: BoxConstraints(maxWidth: 300),
-                    decoration: BoxDecoration(
-                      color: isMe ? Colors.blue[600] : Colors.grey[200],
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: isMe
-                          ? CrossAxisAlignment.end
-                          : CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          msg['message'] ?? '',
-                          style: TextStyle(
-                            color: isMe ? Colors.white : Colors.black87,
-                            fontSize: 15,
+                final showDateHeader =
+                    previousDate == null || !isSameDay(dateTime, previousDate);
+
+                return Column(
+                  crossAxisAlignment: isMe
+                      ? CrossAxisAlignment.end
+                      : CrossAxisAlignment.start,
+                  children: [
+                    if (showDateHeader)
+                      Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 8),
+                        child: Center(
+                          child: Text(
+                            DateFormat('dd/MM/yyyy').format(dateTime),
+                            style: const TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w500,
+                              color: Colors.grey,
+                            ),
                           ),
                         ),
-                        SizedBox(height: 4),
-                        Text(
-                          time,
-                          style: TextStyle(
-                            fontSize: 11,
-                            color: isMe ? Colors.white70 : Colors.black54,
-                          ),
+                      ),
+                    Align(
+                      alignment: isMe
+                          ? Alignment.centerRight
+                          : Alignment.centerLeft,
+                      child: Container(
+                        margin: const EdgeInsets.symmetric(vertical: 4),
+                        padding: const EdgeInsets.symmetric(
+                          vertical: 10,
+                          horizontal: 14,
                         ),
-                      ],
+                        constraints: const BoxConstraints(maxWidth: 300),
+                        decoration: BoxDecoration(
+                          color: isMe ? Colors.blue[600] : Colors.grey[200],
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: isMe
+                              ? CrossAxisAlignment.end
+                              : CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              msg['message'] ?? '',
+                              style: TextStyle(
+                                color: isMe ? Colors.white : Colors.black87,
+                                fontSize: 15,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              DateFormat('HH:mm').format(dateTime),
+                              style: TextStyle(
+                                fontSize: 11,
+                                color: isMe ? Colors.white70 : Colors.black54,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                     ),
-                  ),
+                  ],
                 );
               },
             ),

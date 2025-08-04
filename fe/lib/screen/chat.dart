@@ -27,9 +27,15 @@ class _ChatPageNewState extends State<ChatPage> {
   final ScrollController _scrollController = ScrollController();
   List<Map<String, dynamic>> messages = [];
 
+  bool isSameDay(DateTime a, DateTime b) {
+    return a.year == b.year && a.month == b.month && a.day == b.day;
+  }
+
   final String adminId = '686bfd52d27d660c25c71c2c';
-  String adminName = "Admin";
-  String adminAvatar = "https://cdn-icons-png.flaticon.com/512/149/149071.png";
+  String adminName = "SeatMe";
+  //String adminAvatar = "https://cdn-icons-png.flaticon.com/512/149/149071.png";
+  String adminAvatar = "assets/images/logoapp.PNG";
+
 
   int _selectedIndex = 0; // 🔥 index mặc định là Home
 
@@ -195,7 +201,7 @@ class _ChatPageNewState extends State<ChatPage> {
         title: Row(
           children: [
             CircleAvatar(
-              backgroundImage: NetworkImage(adminAvatar),
+              backgroundImage: AssetImage(adminAvatar),
               radius: 16,
             ),
             const SizedBox(width: 8),
@@ -225,50 +231,93 @@ class _ChatPageNewState extends State<ChatPage> {
                     ? DateTime.tryParse(msg['createdAt'].toString())?.toLocal()
                     : null;
 
-                return Align(
-                  alignment: isMe
-                      ? Alignment.centerRight
-                      : Alignment.centerLeft,
-                  child: ConstrainedBox(
-                    constraints: BoxConstraints(
-                      maxWidth:
-                          MediaQuery.of(context).size.width *
-                          0.7, // Giới hạn chiều rộng
-                    ),
-                    child: Container(
-                      margin: const EdgeInsets.symmetric(
-                        vertical: 4,
-                        horizontal: 8,
-                      ),
-                      padding: const EdgeInsets.symmetric(
-                        vertical: 8,
-                        horizontal: 10,
-                      ),
-                      decoration: BoxDecoration(
-                        color: isMe ? Colors.blue : Colors.grey[200],
-                        borderRadius: BorderRadius.only(
-                          topLeft: const Radius.circular(12),
-                          topRight: const Radius.circular(12),
-                          bottomLeft: Radius.circular(isMe ? 12 : 0),
-                          bottomRight: Radius.circular(isMe ? 0 : 12),
+                // 🧠 Kiểm tra ngày mới
+                bool isNewDay = false;
+                if (index == 0 && createdAt != null) {
+                  isNewDay = true;
+                } else if (index > 0 && createdAt != null) {
+                  final prev = DateTime.tryParse(
+                    messages[index - 1]['createdAt'].toString(),
+                  )?.toLocal();
+                  if (prev != null && !isSameDay(prev, createdAt)) {
+                    isNewDay = true;
+                  }
+                }
+
+                return Column(
+                  children: [
+                    // 📅 Chèn ngày nếu là ngày mới
+                    if (isNewDay)
+                      Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 8.0),
+                        child: Text(
+                          DateFormat('dd/MM/yyyy').format(createdAt!),
+                          style: const TextStyle(
+                            fontSize: 12,
+                            color: Colors.grey,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
-                      child: Column(
-                        crossAxisAlignment: isMe
-                            ? CrossAxisAlignment.end
-                            : CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            msg['message'] ?? '',
-                            style: TextStyle(
-                              color: isMe ? Colors.white : Colors.black,
-                              fontSize: 14, // Gọn hơn
+
+                    // 📨 Tin nhắn như cũ
+                    Align(
+                      alignment: isMe
+                          ? Alignment.centerRight
+                          : Alignment.centerLeft,
+                      child: ConstrainedBox(
+                        constraints: BoxConstraints(
+                          maxWidth: MediaQuery.of(context).size.width * 0.7,
+                        ),
+                        child: Container(
+                          margin: const EdgeInsets.symmetric(
+                            vertical: 4,
+                            horizontal: 8,
+                          ),
+                          padding: const EdgeInsets.symmetric(
+                            vertical: 8,
+                            horizontal: 10,
+                          ),
+                          decoration: BoxDecoration(
+                            color: isMe ? Colors.blue : Colors.grey[200],
+                            borderRadius: BorderRadius.only(
+                              topLeft: const Radius.circular(12),
+                              topRight: const Radius.circular(12),
+                              bottomLeft: Radius.circular(isMe ? 12 : 0),
+                              bottomRight: Radius.circular(isMe ? 0 : 12),
                             ),
                           ),
-                        ],
+                          child: Column(
+                            crossAxisAlignment: isMe
+                                ? CrossAxisAlignment.end
+                                : CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                msg['message'] ?? '',
+                                style: TextStyle(
+                                  color: isMe ? Colors.white : Colors.black,
+                                  fontSize: 14,
+                                ),
+                              ),
+                              if (createdAt != null)
+                                Padding(
+                                  padding: const EdgeInsets.only(top: 4.0),
+                                  child: Text(
+                                    DateFormat('HH:mm').format(createdAt),
+                                    style: TextStyle(
+                                      color: isMe
+                                          ? Colors.white70
+                                          : Colors.black54,
+                                      fontSize: 11,
+                                    ),
+                                  ),
+                                ),
+                            ],
+                          ),
+                        ),
                       ),
                     ),
-                  ),
+                  ],
                 );
               },
             ),

@@ -36,6 +36,7 @@ flutter_icons:
 flutter:
   uses-material-design: true
   assets:
+    - assets/images/logoapp.PNG
     - assets/images/
     - assets/imgChiNhanh/
     - assets/imgUuDai/
