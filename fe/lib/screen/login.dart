@@ -31,8 +31,25 @@ class _LoginPageState extends State<LoginPage> {
   void _showSnackBar(String message, {bool isError = true}) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(message),
-        backgroundColor: isError ? Colors.red : Colors.green,
+        content: Row(
+          children: const [
+            Icon(Icons.check_circle_outline, color: Colors.white),
+            SizedBox(width: 10),
+            Text(
+              'Đăng nhập thành công!',
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+                fontSize: 16,
+              ),
+            ),
+          ],
+        ),
+        backgroundColor: Colors.green,
+        behavior: SnackBarBehavior.floating,
+        margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        duration: const Duration(seconds: 2),
       ),
     );
   }
@@ -159,7 +176,11 @@ class _LoginPageState extends State<LoginPage> {
           padding: const EdgeInsets.symmetric(vertical: 16),
           child: const Text(
             'Đăng nhập',
-            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white),
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+            ),
           ),
         ),
       ),
@@ -209,20 +230,29 @@ class _LoginPageState extends State<LoginPage> {
                     ],
                   ),
                   child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 30.0, vertical: 40.0),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 30.0,
+                      vertical: 40.0,
+                    ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
                         _buildLogo(),
                         const SizedBox(height: 30),
-                        _buildInputField(icon: Icons.email, label: 'Email', controller: _emailController),
+                        _buildInputField(
+                          icon: Icons.email,
+                          label: 'Email',
+                          controller: _emailController,
+                        ),
                         const SizedBox(height: 20),
                         _buildInputField(
                           icon: Icons.lock,
                           label: 'Mật khẩu',
                           controller: _passwordController,
                           obscureText: _obscurePassword,
-                          toggleObscure: () => setState(() => _obscurePassword = !_obscurePassword),
+                          toggleObscure: () => setState(
+                            () => _obscurePassword = !_obscurePassword,
+                          ),
                         ),
                         const SizedBox(height: 10),
                         Align(
@@ -230,27 +260,45 @@ class _LoginPageState extends State<LoginPage> {
                           child: TextButton(
                             onPressed: () => Navigator.push(
                               context,
-                              MaterialPageRoute(builder: (_) => const ForgotPasswordPage()),
+                              MaterialPageRoute(
+                                builder: (_) => const ForgotPasswordPage(),
+                              ),
                             ),
                             child: const Text(
                               'Quên mật khẩu',
-                              style: TextStyle(color: Color(0xFFE53935), fontWeight: FontWeight.bold),
+                              style: TextStyle(
+                                color: Color(0xFFE53935),
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
                           ),
                         ),
                         const SizedBox(height: 20),
-                        _isLoading ? const Center(child: CircularProgressIndicator()) : _buildLoginButton(),
+                        _isLoading
+                            ? const Center(child: CircularProgressIndicator())
+                            : _buildLoginButton(),
                         const SizedBox(height: 30),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            const Text("Bạn chưa có tài khoản? ", style: TextStyle(color: Colors.grey)),
+                            const Text(
+                              "Bạn chưa có tài khoản? ",
+                              style: TextStyle(color: Colors.grey),
+                            ),
                             GestureDetector(
                               onTap: () => Navigator.push(
                                 context,
-                                MaterialPageRoute(builder: (_) => const RegisterPage()),
+                                MaterialPageRoute(
+                                  builder: (_) => const RegisterPage(),
+                                ),
                               ),
-                              child: const Text('Đăng ký', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black)),
+                              child: const Text(
+                                'Đăng ký',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.black,
+                                ),
+                              ),
                             ),
                           ],
                         ),

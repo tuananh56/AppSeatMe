@@ -41,36 +41,36 @@ class _RegisterPageState extends State<RegisterPage> {
 
     if ([name, email, password, confirmPassword, phone].any((e) => e.isEmpty) ||
         _selectedImage == null) {
-      _showMessage('❗ Vui lòng điền đầy đủ thông tin và chọn ảnh đại diện');
+      _showMessage('Vui lòng điền đầy đủ thông tin và chọn ảnh đại diện');
       return;
     }
 
     // ✅ Kiểm tra độ dài mật khẩu
     if (password.length < 6) {
-      _showMessage('❗ Mật khẩu phải có ít nhất 6 ký tự');
+      _showMessage('Mật khẩu phải có ít nhất 6 ký tự');
       return;
     }
 
     // ✅ Kiểm tra chữ in hoa
     if (!RegExp(r'[A-Z]').hasMatch(password)) {
-      _showMessage('❗ Mật khẩu phải chứa ít nhất 1 chữ in hoa (A-Z)');
+      _showMessage('Mật khẩu phải chứa ít nhất 1 chữ in hoa (A-Z)');
       return;
     }
 
     // ✅ Kiểm tra chữ thường
     if (!RegExp(r'[a-z]').hasMatch(password)) {
-      _showMessage('❗ Mật khẩu phải chứa ít nhất 1 chữ thường (a-z)');
+      _showMessage('Mật khẩu phải chứa ít nhất 1 chữ thường (a-z)');
       return;
     }
 
     // ✅ Kiểm tra ký tự đặc biệt
     if (!RegExp(r'[!@#\$%^&*(),.?":{}|<>]').hasMatch(password)) {
-      _showMessage('❗ Mật khẩu phải chứa ít nhất 1 ký tự đặc biệt');
+      _showMessage('Mật khẩu phải chứa ít nhất 1 ký tự đặc biệt');
       return;
     }
 
     if (password != confirmPassword) {
-      _showMessage('❗ Mật khẩu xác nhận không khớp');
+      _showMessage('Mật khẩu xác nhận không khớp');
       return;
     }
 
@@ -98,10 +98,36 @@ class _RegisterPageState extends State<RegisterPage> {
     }
   }
 
-  void _showMessage(String msg, {Color bgColor = Colors.red}) {
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(SnackBar(content: Text(msg), backgroundColor: bgColor));
+  void _showMessage(String message, {Color bgColor = Colors.red}) {
+    final icon = bgColor == Colors.green
+        ? Icons.check_circle_outline
+        : Icons.error_outline;
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Row(
+          children: [
+            Icon(icon, color: Colors.white),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                message,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ],
+        ),
+        backgroundColor: bgColor,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        duration: const Duration(seconds: 3),
+      ),
+    );
   }
 
   Widget _buildInputField({

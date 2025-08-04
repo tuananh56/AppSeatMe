@@ -6,6 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:app_dat_ban/screen/login.dart';
 import 'package:app_dat_ban/screen/booking_history.dart';
 import 'package:app_dat_ban/screen/like_chua.dart';
+import 'package:app_dat_ban/screen/home.dart';
 import 'package:app_dat_ban/screen/edit_profile.dart';
 import 'package:app_dat_ban/screen/admin_chat.dart';
 
@@ -52,9 +53,33 @@ class _AccountPageState extends State<AccountPage> {
     });
 
     if (context.mounted) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text("Đăng xuất thành công")));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Row(
+            children: const [
+              Icon(Icons.logout, color: Colors.white),
+              SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  'Đăng xuất thành công',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          backgroundColor: Colors.green,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          duration: const Duration(seconds: 2),
+        ),
+      );
     }
   }
 
@@ -237,7 +262,9 @@ class _AccountPageState extends State<AccountPage> {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (_) => LikePage(userId: _user!['_id']),
+                    builder: (_) => LikePage(
+                      userId: _user!['_id'],
+                    ), // ✅ Mở trực tiếp LikePage
                   ),
                 );
               }

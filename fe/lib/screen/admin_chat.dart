@@ -7,7 +7,7 @@ import 'search.dart';
 import 'account.dart';
 import 'package:intl/intl.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
-import 'package:intl/intl.dart'; // Thêm ở đầu file nếu chưa có
+//import 'package:intl/intl.dart'; // Thêm ở đầu file nếu chưa có
 
 class AdminChatScreen extends StatefulWidget {
   const AdminChatScreen({super.key});
@@ -125,7 +125,7 @@ class _AdminChatScreenState extends State<AdminChatScreen> {
     }
   }
 
-  Future<void> _fetchUserAvatar(String userId) async {
+ /* Future<void> _fetchUserAvatar(String userId) async {
     if (userAvatars.containsKey(userId)) return;
 
     try {
@@ -148,7 +148,7 @@ class _AdminChatScreenState extends State<AdminChatScreen> {
     } catch (e) {
       print('Error fetching avatar: $e');
     }
-  }
+  }*/
 
   void _sendMessage() {
     final text = _messageController.text.trim();

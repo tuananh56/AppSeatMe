@@ -36,31 +36,31 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
     final otp = _otpFromOtpPage?.trim();
 
     if (otp == null || otp.isEmpty) {
-      _showMessage("❗ Thiếu mã OTP từ trang trước");
+      _showMessage("Thiếu mã OTP từ trang trước");
       return;
     }
 
     // 🔥 Kiểm tra mật khẩu mạnh
     if (newPassword.length < 6) {
-      _showMessage("❗ Mật khẩu phải có ít nhất 6 ký tự");
+      _showMessage("Mật khẩu phải có ít nhất 6 ký tự");
       return;
     }
     if (!RegExp(r'[A-Z]').hasMatch(newPassword)) {
-      _showMessage("❗ Mật khẩu phải chứa ít nhất 1 chữ in hoa (A-Z)");
+      _showMessage("Mật khẩu phải chứa ít nhất 1 chữ in hoa (A-Z)");
       return;
     }
     if (!RegExp(r'[a-z]').hasMatch(newPassword)) {
-      _showMessage("❗ Mật khẩu phải chứa ít nhất 1 chữ thường (a-z)");
+      _showMessage("Mật khẩu phải chứa ít nhất 1 chữ thường (a-z)");
       return;
     }
     if (!RegExp(r'[!@#\$%^&*(),.?":{}|<>]').hasMatch(newPassword)) {
-      _showMessage("❗ Mật khẩu phải chứa ít nhất 1 ký tự đặc biệt");
+      _showMessage("Mật khẩu phải chứa ít nhất 1 ký tự đặc biệt");
       return;
     }
 
     // 🔑 Kiểm tra mật khẩu xác nhận
     if (newPassword != confirmPassword) {
-      _showMessage("❗ Mật khẩu xác nhận không khớp");
+      _showMessage("Mật khẩu xác nhận không khớp");
       return;
     }
 
@@ -78,7 +78,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
 
       final data = jsonDecode(response.body);
       if (response.statusCode == 200) {
-        _showMessage("✅ Đổi mật khẩu thành công", isError: false);
+        _showMessage("Đổi mật khẩu thành công", isError: false);
         Navigator.popUntil(context, (route) => route.isFirst);
       } else {
         _showMessage(data['message'] ?? "Thất bại khi đặt lại mật khẩu");
@@ -91,10 +91,31 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
   }
 
   void _showMessage(String message, {bool isError = true}) {
+    final icon = isError ? Icons.error_outline : Icons.check_circle_outline;
+    final bgColor = isError ? Colors.red : Colors.green;
+
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(message),
-        backgroundColor: isError ? Colors.red : Colors.green,
+        content: Row(
+          children: [
+            Icon(icon, color: Colors.white),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                message,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ],
+        ),
+        backgroundColor: bgColor,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         duration: const Duration(seconds: 2),
       ),
     );
@@ -164,8 +185,12 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
         centerTitle: true, // ✅ Canh giữa tiêu đề
         title: const Text(
           "Đặt lại mật khẩu",
-          style: TextStyle(color: Colors.white), // ✅ Màu trắng
+          style: TextStyle(
+            color: Colors.white, // ✅ Màu trắng
+            fontWeight: FontWeight.bold, // ✅ In đậm
+          ),
         ),
+
         flexibleSpace: Container(
           decoration: const BoxDecoration(
             gradient: LinearGradient(

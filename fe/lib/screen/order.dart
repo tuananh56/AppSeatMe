@@ -122,7 +122,7 @@ class _OrderPageState extends State<OrderPage> {
     await showDialog(
       context: context,
       builder: (_) => AlertDialog(
-        title: const Text('🔒 Yêu cầu đăng nhập'),
+        title: const Text('Yêu cầu đăng nhập'),
         content: const Text('Vui lòng đăng nhập để thực hiện đặt bàn.'),
         actions: [
           TextButton(

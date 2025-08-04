@@ -121,23 +121,73 @@ class _PaymentState extends State<Payment> with SingleTickerProviderStateMixin {
           ),
           ElevatedButton(
             onPressed: () async {
-              final url = Uri.parse('http://192.168.228.138:5000/api/bookings/${widget.bookingId}/pay');
+              final url = Uri.parse(
+                'http://192.168.228.138:5000/api/bookings/${widget.bookingId}/pay',
+              );
               try {
                 final response = await http.post(url);
 
                 if (response.statusCode == 200) {
                   Navigator.pop(context); // Đóng dialog QR
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('✅ Xác nhận thanh toán thành công'),
+                    SnackBar(
+                      content: Row(
+                        children: const [
+                          Icon(Icons.check_circle_outline, color: Colors.white),
+                          SizedBox(width: 12),
+                          Expanded(
+                            child: Text(
+                              'Xác nhận thanh toán thành công',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
                       backgroundColor: Colors.green,
+                      behavior: SnackBarBehavior.floating,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      margin: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 12,
+                      ),
+                      duration: const Duration(seconds: 3),
                     ),
                   );
                 } else {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('❌ Lỗi khi xác nhận thanh toán'),
+                    SnackBar(
+                      content: Row(
+                        children: const [
+                          Icon(Icons.error_outline, color: Colors.white),
+                          SizedBox(width: 12),
+                          Expanded(
+                            child: Text(
+                              'Lỗi khi xác nhận thanh toán',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
                       backgroundColor: Colors.red,
+                      behavior: SnackBarBehavior.floating,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      margin: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 12,
+                      ),
+                      duration: const Duration(seconds: 3),
                     ),
                   );
                 }

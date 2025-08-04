@@ -10,6 +10,7 @@ import 'package:app_dat_ban/screen/detailchinhanh.dart';
 import 'package:app_dat_ban/screen/detail/allchinhanh.dart';
 import 'package:app_dat_ban/screen/more.dart';
 import 'package:app_dat_ban/screen/chat.dart';
+import 'like_chua.dart';
 import 'package:app_dat_ban/screen/admin.dart' as admin;
 
 class HomePage extends StatefulWidget {
@@ -38,6 +39,7 @@ class _HomePageState extends State<HomePage> {
       HomeContent(user: _user),
       const NearYouPage(),
       const SearchPage(),
+      //LikePage(userId: _user?['_id'] ?? ''), // index 3: Yêu thích
       const AccountPage(),
       (_user != null && _user!['role'] == 'admin')
           ? const admin.AdminPage()

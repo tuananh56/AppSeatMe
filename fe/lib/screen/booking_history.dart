@@ -6,7 +6,7 @@ import 'package:app_dat_ban/screen/home.dart';
 import 'package:app_dat_ban/screen/nearyou.dart';
 import 'package:app_dat_ban/screen/search.dart';
 import 'package:app_dat_ban/screen/account.dart';
-import 'package:url_launcher/url_launcher.dart';
+//import 'package:url_launcher/url_launcher.dart';
 
 class BookingHistoryPage extends StatefulWidget {
   final String userId;
@@ -116,7 +116,7 @@ class _BookingHistoryPageState extends State<BookingHistoryPage> {
     );
   }
 
-  Future<void> _launchPhoneDialer(String phoneNumber) async {
+  /*Future<void> _launchPhoneDialer(String phoneNumber) async {
     if (phoneNumber.isEmpty) {
       phoneNumber = "0375028860";
     }
@@ -129,7 +129,7 @@ class _BookingHistoryPageState extends State<BookingHistoryPage> {
         const SnackBar(content: Text("Không thể mở ứng dụng gọi điện")),
       );
     }
-  }
+  }*/
 
   String _formatDate(String? dateStr) {
     if (dateStr == null) return '';
@@ -289,25 +289,72 @@ class _BookingHistoryPageState extends State<BookingHistoryPage> {
                         ),
                 ),
                 if (totalPages > 1)
-                  Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        IconButton(
-                          onPressed: _currentPage > 0
-                              ? () => setState(() => _currentPage--)
-                              : null,
-                          icon: const Icon(Icons.arrow_back),
+                  SafeArea(
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Center(
+                        child: Wrap(
+                          spacing: 8,
+                          children: () {
+                            const visiblePages = 3;
+                            List<Widget> buttons = [];
+
+                            void addButton(int pageNum) {
+                              buttons.add(
+                                ElevatedButton(
+                                  onPressed: () {
+                                    setState(() {
+                                      _currentPage = pageNum - 1;
+                                    });
+                                  },
+                                  style: ElevatedButton.styleFrom(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 16,
+                                      vertical: 8,
+                                    ),
+                                    backgroundColor:
+                                        (_currentPage + 1) == pageNum
+                                        ? Colors.red
+                                        : Colors.grey[300],
+                                    foregroundColor:
+                                        (_currentPage + 1) == pageNum
+                                        ? Colors.white
+                                        : Colors.black,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                  ),
+                                  child: Text('$pageNum'),
+                                ),
+                              );
+                            }
+
+                            if ((_currentPage + 1) > visiblePages) {
+                              addButton(1);
+                              buttons.add(const Text('...'));
+                            }
+
+                            int start = (_currentPage + 1 - 1).clamp(
+                              1,
+                              totalPages,
+                            );
+                            int end = (_currentPage + 1 + 1).clamp(
+                              1,
+                              totalPages,
+                            );
+                            for (int i = start; i <= end; i++) {
+                              addButton(i);
+                            }
+
+                            if ((_currentPage + 1) <
+                                totalPages - (visiblePages - 1)) {
+                              buttons.add(const Text('...'));
+                              addButton(totalPages);
+                            }
+                            return buttons;
+                          }(),
                         ),
-                        Text("Trang ${_currentPage + 1} / $totalPages"),
-                        IconButton(
-                          onPressed: _currentPage < totalPages - 1
-                              ? () => setState(() => _currentPage++)
-                              : null,
-                          icon: const Icon(Icons.arrow_forward),
-                        ),
-                      ],
+                      ),
                     ),
                   ),
               ],

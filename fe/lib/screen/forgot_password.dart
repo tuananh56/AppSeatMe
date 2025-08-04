@@ -75,7 +75,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
     );
   }
 
-  Widget _buildGradientTitle(String text) {
+  /*Widget _buildGradientTitle(String text) {
     return ShaderMask(
       shaderCallback: (Rect bounds) {
         return const LinearGradient(
@@ -92,7 +92,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
         textAlign: TextAlign.center,
       ),
     );
-  }
+  }*/
 
   @override
   Widget build(BuildContext context) {
@@ -140,7 +140,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                 TextField(
                   controller: _emailController,
                   keyboardType: TextInputType.emailAddress,
-                  style: const TextStyle(color: Colors.red), // ✅ Chữ đỏ
+                  //style: const TextStyle(color: Colors.red), // ✅ Chữ đỏ
                   decoration: const InputDecoration(
                     labelText: 'Email',
                     labelStyle: TextStyle(color: Colors.red), // ✅ Label màu đỏ

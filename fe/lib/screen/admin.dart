@@ -29,6 +29,78 @@ class _AdminPageState extends State<AdminPage> {
     );
   }
 
+  List<Widget> _buildPaginationButtons() {
+    const int maxVisibleButtons = 3;
+    List<Widget> buttons = [];
+
+    void addPageButton(int pageNum) {
+      buttons.add(
+        ElevatedButton(
+          onPressed: () {
+            setState(() {
+              _currentPage = pageNum;
+            });
+          },
+          style: ElevatedButton.styleFrom(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            backgroundColor: _currentPage == pageNum
+                ? Colors.red
+                : Colors.grey[300],
+            foregroundColor: _currentPage == pageNum
+                ? Colors.white
+                : Colors.black,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
+            ),
+          ),
+          child: Text('$pageNum'),
+        ),
+      );
+    }
+
+    // Always show first page
+    addPageButton(1);
+
+    if (_currentPage > 3) {
+      buttons.add(
+        const Padding(
+          padding: EdgeInsets.symmetric(horizontal: 4),
+          child: Text('...'),
+        ),
+      );
+    }
+
+    int start = _currentPage - 1;
+    int end = _currentPage + 1;
+
+    if (_currentPage <= 2) {
+      start = 2;
+      end = 4;
+    } else if (_currentPage >= totalPages - 1) {
+      start = totalPages - 3;
+      end = totalPages - 1;
+    }
+
+    for (int i = start; i <= end; i++) {
+      if (i > 1 && i < totalPages) addPageButton(i);
+    }
+
+    if (_currentPage < totalPages - 2) {
+      buttons.add(
+        const Padding(
+          padding: EdgeInsets.symmetric(horizontal: 4),
+          child: Text('...'),
+        ),
+      );
+    }
+
+    if (totalPages > 1) {
+      addPageButton(totalPages);
+    }
+
+    return buttons;
+  }
+
   int get totalPages =>
       (_filteredBookings.length / _itemsPerPage).ceil().clamp(1, 9999);
 
@@ -90,9 +162,9 @@ class _AdminPageState extends State<AdminPage> {
 
       if (response.statusCode == 200) {
         await _fetchBookings();
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Đã xác nhận thanh toán')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('Đã xác nhận thanh toán')));
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Lỗi thanh toán: ${response.statusCode}')),
@@ -305,27 +377,18 @@ class _AdminPageState extends State<AdminPage> {
                       },
                     ),
                   ),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 8),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        IconButton(
-                          icon: const Icon(Icons.arrow_back),
-                          onPressed: _currentPage > 1
-                              ? () => setState(() => _currentPage--)
-                              : null,
+                  if (totalPages > 1)
+                    SafeArea(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 8),
+                        child: Center(
+                          child: Wrap(
+                            spacing: 8,
+                            children: _buildPaginationButtons(),
+                          ),
                         ),
-                        Text('Trang $_currentPage / $totalPages'),
-                        IconButton(
-                          icon: const Icon(Icons.arrow_forward),
-                          onPressed: _currentPage < totalPages
-                              ? () => setState(() => _currentPage++)
-                              : null,
-                        ),
-                      ],
+                      ),
                     ),
-                  ),
                 ],
               ),
       ),

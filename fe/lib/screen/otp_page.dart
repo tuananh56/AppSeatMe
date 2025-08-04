@@ -24,7 +24,7 @@ class _OtpPageState extends State<OtpPage> {
     final otp = _otpController.text.trim();
 
     if (otp.length != 6 || int.tryParse(otp) == null) {
-      _showMessage('❗ Mã OTP không hợp lệ');
+      _showMessage('Mã OTP không hợp lệ');
       return;
     }
 
@@ -38,7 +38,7 @@ class _OtpPageState extends State<OtpPage> {
 
       final data = jsonDecode(response.body);
       if (response.statusCode == 200) {
-        _showMessage("✅ Mã OTP hợp lệ", isError: false);
+        _showMessage("Mã OTP hợp lệ", isError: false);
 
         Navigator.pushNamed(
           context,
@@ -56,11 +56,32 @@ class _OtpPageState extends State<OtpPage> {
   }
 
   void _showMessage(String message, {bool isError = true}) {
+    final icon = isError ? Icons.error_outline : Icons.check_circle_outline;
+    final bgColor = isError ? Colors.red : Colors.green;
+
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(message),
-        backgroundColor: isError ? Colors.red : Colors.green,
-        duration: const Duration(seconds: 2),
+        content: Row(
+          children: [
+            Icon(icon, color: Colors.white),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                message,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ],
+        ),
+        backgroundColor: bgColor,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        duration: const Duration(seconds: 3),
       ),
     );
   }
@@ -107,23 +128,12 @@ class _OtpPageState extends State<OtpPage> {
             TextField(
               controller: _otpController,
               keyboardType: TextInputType.number,
-              maxLength: 6,
-              decoration: InputDecoration(
+              decoration: const InputDecoration(
                 labelText: 'Mã OTP',
-                labelStyle: const TextStyle(color: Colors.redAccent),
-                suffixIcon: const Icon(Icons.lock_clock, color: Colors.redAccent),
-                filled: true,
-                fillColor: Colors.white,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide.none,
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: const BorderSide(color: Colors.transparent),
-                ),
+                labelStyle: TextStyle(color: Colors.redAccent),
+                suffixIcon: Icon(Icons.lock_clock, color: Colors.redAccent),
+                border: OutlineInputBorder(), // ✅ Viền xám mặc định
               ),
-              style: const TextStyle(color: Colors.red),
             ),
             const SizedBox(height: 30),
             SizedBox(
