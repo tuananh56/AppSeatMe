@@ -32,20 +32,25 @@ class _LoginPageState extends State<LoginPage> {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Row(
-          children: const [
-            Icon(Icons.check_circle_outline, color: Colors.white),
-            SizedBox(width: 10),
-            Text(
-              'Đăng nhập thành công!',
-              style: TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
-                fontSize: 16,
+          children: [
+            Icon(
+              isError ? Icons.error_outline : Icons.check_circle_outline,
+              color: Colors.white,
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Text(
+                message,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16,
+                ),
               ),
             ),
           ],
         ),
-        backgroundColor: Colors.green,
+        backgroundColor: isError ? Colors.red : Colors.green,
         behavior: SnackBarBehavior.floating,
         margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -84,7 +89,7 @@ class _LoginPageState extends State<LoginPage> {
         await prefs.setString('user', jsonEncode(user));
         await prefs.setString('userImage', user['imageUrl'] ?? '');
 
-        _showSnackBar("\u2714\uFE0F Đăng nhập thành công", isError: false);
+        _showSnackBar("Đăng nhập thành công!", isError: false);
 
         Future.delayed(const Duration(seconds: 1), () {
           Navigator.pushReplacement(
@@ -93,7 +98,10 @@ class _LoginPageState extends State<LoginPage> {
           );
         });
       } else {
-        _showSnackBar(data['message'] ?? 'Đăng nhập thất bại');
+        _showSnackBar(
+          data['message'] ?? 'Email hoặc mật khẩu không đúng',
+          isError: true,
+        );
       }
     } catch (e) {
       _showSnackBar('Lỗi kết nối máy chủ: $e');

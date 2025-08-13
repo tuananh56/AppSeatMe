@@ -113,7 +113,7 @@ router.post('/login', async (req, res) => {
     console.error('❌ Lỗi login:', err);
     res.status(500).json({ message: 'Lỗi server. Vui lòng thử lại.' });
   }
-});
+}); 
 
 // ✅ Cập nhật thông tin người dùng (name, email, phone, ảnh)
 router.put('/:id', upload.single('image'), async (req, res) => {

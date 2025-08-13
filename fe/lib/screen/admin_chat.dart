@@ -60,6 +60,8 @@ class _AdminChatScreenState extends State<AdminChatScreen> {
 
     socket.onConnect((_) {
       print('Socket connected');
+      socket.emit('join', adminId);
+      //socket.emit('registerUser', adminId); // Đăng ký adminId cho server
     });
 
     socket.on('receiveMessage', (data) {
@@ -265,7 +267,12 @@ class _AdminChatScreenState extends State<AdminChatScreen> {
       final timeB =
           DateTime.tryParse(b['createdAt'] ?? b['timestamp'] ?? '') ??
           DateTime.now();
-      return timeA.compareTo(timeB); // tăng dần
+
+      // Nếu thời gian giống nhau thì dùng id làm fallback
+      final result = timeA.compareTo(timeB);
+      if (result != 0) return result;
+
+      return a['id'].compareTo(b['id']); // id nên là String hoặc số tăng dần
     });
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
