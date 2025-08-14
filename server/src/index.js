@@ -46,8 +46,8 @@ app.use('/uploads', express.static(uploadPath));
 
 // Kết nối MongoDB
 mongoose.connect('mongodb://localhost:27017/app_dat_ban', {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
+/*  useNewUrlParser: true,b
+  useUnifiedTopology: true,*/
 })
 .then(() => console.log("✅ Kết nối MongoDB thành công"))
 .catch((err) => console.error("❌ Kết nối MongoDB thất bại:", err));

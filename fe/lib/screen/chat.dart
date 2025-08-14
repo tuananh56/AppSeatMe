@@ -36,7 +36,6 @@ class _ChatPageNewState extends State<ChatPage> {
   //String adminAvatar = "https://cdn-icons-png.flaticon.com/512/149/149071.png";
   String adminAvatar = "assets/images/logoapp.PNG";
 
-
   int _selectedIndex = 0; // 🔥 index mặc định là Home
 
   @override
@@ -200,10 +199,7 @@ class _ChatPageNewState extends State<ChatPage> {
         ),
         title: Row(
           children: [
-            CircleAvatar(
-              backgroundImage: AssetImage(adminAvatar),
-              radius: 16,
-            ),
+            CircleAvatar(backgroundImage: AssetImage(adminAvatar), radius: 16),
             const SizedBox(width: 8),
             Expanded(
               child: Text(
@@ -348,6 +344,8 @@ class _ChatPageNewState extends State<ChatPage> {
                   Expanded(
                     child: TextField(
                       controller: _messageController,
+                      keyboardType: TextInputType.multiline,
+                      maxLines: null, // Cho phép xuống dòng tự động
                       decoration: const InputDecoration(
                         hintText: 'Nhập tin nhắn...',
                         border: InputBorder.none,

@@ -166,6 +166,8 @@ class _AdminChatScreenState extends State<AdminChatScreen> {
       'message': text,
       'createdAt': DateTime.now()
           .toIso8601String(), // ⚠ Đổi "timestamp" thành "createdAt" cho đồng bộ với BE
+      'localIndex': DateTime.now().microsecondsSinceEpoch, // 🔥 luôn tăng
+      'isTemp': true,
     };
 
     // Gửi qua socket
@@ -174,6 +176,14 @@ class _AdminChatScreenState extends State<AdminChatScreen> {
     // Thêm ngay vào UI
     setState(() {
       userMessages[selectedUserId]!.add(message);
+
+      // Sắp xếp lại theo thời gian
+      userMessages[selectedUserId]!.sort((a, b) {
+        return DateTime.parse(
+          a['createdAt'],
+        ).compareTo(DateTime.parse(b['createdAt']));
+      });
+
       _messageController.clear();
     });
 
@@ -263,16 +273,17 @@ class _AdminChatScreenState extends State<AdminChatScreen> {
     messages.sort((a, b) {
       final timeA =
           DateTime.tryParse(a['createdAt'] ?? a['timestamp'] ?? '') ??
-          DateTime.now();
+          DateTime.fromMillisecondsSinceEpoch(0);
       final timeB =
           DateTime.tryParse(b['createdAt'] ?? b['timestamp'] ?? '') ??
-          DateTime.now();
+          DateTime.fromMillisecondsSinceEpoch(0);
 
-      // Nếu thời gian giống nhau thì dùng id làm fallback
-      final result = timeA.compareTo(timeB);
-      if (result != 0) return result;
+      /*if (timeA.isBefore(timeB)) return -1;
+      if (timeA.isAfter(timeB)) return 1;
 
-      return a['id'].compareTo(b['id']); // id nên là String hoặc số tăng dần
+      // Nếu thời gian bằng nhau, giữ nguyên thứ tự theo lúc thêm vào
+      return 0; // Không dùng so sánh id nữa*/
+      return timeA.compareTo(timeB); // sắp xếp tăng dần theo thời gian
     });
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -395,6 +406,8 @@ class _AdminChatScreenState extends State<AdminChatScreen> {
                   Expanded(
                     child: TextField(
                       controller: _messageController,
+                      keyboardType: TextInputType.multiline,
+                      maxLines: null, // Cho phép xuống dòng tự động
                       decoration: const InputDecoration(
                         hintText: 'Nhập tin nhắn...',
                         border: InputBorder.none,

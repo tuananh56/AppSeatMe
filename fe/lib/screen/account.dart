@@ -227,19 +227,20 @@ class _AccountPageState extends State<AccountPage> {
                 },
               ),
             // Danh sách chức năng
-            _buildMenuTile(Icons.support_agent, 'Liên hệ hỗ trợ', () {
-              if (_user != null) {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) =>
-                        ChatPage(user: _user), // 👉 Truyền user sang ChatPage
-                  ),
-                );
-              } else {
-                _showLoginRequiredDialog(); // Nếu chưa đăng nhập thì yêu cầu đăng nhập
-              }
-            }),
+            if (_user != null && _user!['role'] != 'admin')
+              _buildMenuTile(Icons.support_agent, 'Liên hệ hỗ trợ', () {
+                if (_user != null) {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) =>
+                          ChatPage(user: _user), // 👉 Truyền user sang ChatPage
+                    ),
+                  );
+                } else {
+                  _showLoginRequiredDialog(); // Nếu chưa đăng nhập thì yêu cầu đăng nhập
+                }
+              }),
             _buildMenuTile(Icons.edit, 'Chỉnh sửa thông tin', () {
               if (_user != null) {
                 Navigator.push(
@@ -247,8 +248,13 @@ class _AccountPageState extends State<AccountPage> {
                   MaterialPageRoute(
                     builder: (_) => EditProfilePage(user: _user!),
                   ),
-                ).then((_) {
-                  _loadUserFromPrefs();
+                ).then((updatedUser) {
+                  if (updatedUser != null) {
+                    setState(() {
+                      _user = updatedUser; // cập nhật Card ngay lập tức
+                    });
+                  }
+                 // _loadUserFromPrefs();
                 });
               }
             }),

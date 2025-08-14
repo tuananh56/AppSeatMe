@@ -78,7 +78,16 @@ class _EditProfilePageState extends State<EditProfilePage> {
 
     if (error == null) {
       _showMessage('✅ Cập nhật thành công', bgColor: Colors.green);
-      Navigator.pop(context);
+      // Truyền user mới về AccountPage
+      final updatedUser = {
+        ...widget.user, // giữ các trường cũ
+        'name': _nameController.text.trim(),
+        'phone': _phoneController.text.trim(),
+        if (_selectedImage != null)
+          'imageUrl': _selectedImage!.path, // hoặc URL mới trả về từ server
+      };
+
+      Navigator.pop(context,updatedUser);
     } else {
       _showMessage(error);
     }
