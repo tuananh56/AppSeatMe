@@ -10,7 +10,7 @@ import 'package:app_dat_ban/screen/detailchinhanh.dart';
 import 'package:app_dat_ban/screen/detail/allchinhanh.dart';
 import 'package:app_dat_ban/screen/more.dart';
 import 'package:app_dat_ban/screen/chat.dart';
-import 'like_chua.dart';
+//import 'like_chua.dart';
 import 'package:app_dat_ban/screen/admin.dart' as admin;
 
 class HomePage extends StatefulWidget {

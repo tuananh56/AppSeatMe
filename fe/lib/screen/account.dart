@@ -6,7 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:app_dat_ban/screen/login.dart';
 import 'package:app_dat_ban/screen/booking_history.dart';
 import 'package:app_dat_ban/screen/like_chua.dart';
-import 'package:app_dat_ban/screen/home.dart';
+//import 'package:app_dat_ban/screen/home.dart';
 import 'package:app_dat_ban/screen/edit_profile.dart';
 import 'package:app_dat_ban/screen/admin_chat.dart';
 
