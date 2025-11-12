@@ -60,7 +60,7 @@ class _LikePageState extends State<LikePage> {
   Future<void> fetchLikedBranches() async {
     try {
       final response = await http.get(
-        Uri.parse('http://192.168.228.138:5000/api/favorites/${widget.userId}'),
+        Uri.parse('http://172.16.217.138:5000/api/favorites/${widget.userId}'),
       );
 
       if (response.statusCode == 200) {
@@ -81,7 +81,7 @@ class _LikePageState extends State<LikePage> {
     try {
       final response = await http.delete(
         Uri.parse(
-          'http://192.168.228.138:5000/api/favorites/${widget.userId}/$branchId',
+          'http://172.16.217.138:5000/api/favorites/${widget.userId}/$branchId',
         ),
       );
       if (response.statusCode == 200) {

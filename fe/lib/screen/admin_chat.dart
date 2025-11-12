@@ -49,7 +49,7 @@ class _AdminChatScreenState extends State<AdminChatScreen> {
 
   void _connectSocket() {
     socket = IO.io(
-      'http://192.168.228.138:5000',
+      'http://172.16.217.138:5000',
       IO.OptionBuilder()
           .setTransports(['websocket'])
           .enableAutoConnect()
@@ -91,7 +91,7 @@ class _AdminChatScreenState extends State<AdminChatScreen> {
   Future<void> _fetchChatHistory() async {
     try {
       final res = await http.get(
-        Uri.parse('http://192.168.228.138:5000/api/chat/history'),
+        Uri.parse('http://172.16.217.138:5000/api/chat/history'),
       );
 
       if (res.statusCode == 200) {
@@ -115,7 +115,7 @@ class _AdminChatScreenState extends State<AdminChatScreen> {
           userAvatars[userId] =
               (userInfo['imageUrl'] != null &&
                   userInfo['imageUrl'].toString().isNotEmpty)
-              ? 'http://192.168.228.138:5000${userInfo['imageUrl']}'
+              ? 'http://172.16.217.138:5000${userInfo['imageUrl']}'
               : '';
         }
 

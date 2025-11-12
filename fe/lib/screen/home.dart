@@ -128,7 +128,7 @@ class _HomeContentState extends State<HomeContent> {
   Future<void> fetchBranches() async {
     try {
       final response = await http.get(
-        Uri.parse('http://192.168.228.138:5000/api/branches'),
+        Uri.parse('http://172.16.217.138:5000/api/branches'),
       );
 
       if (response.statusCode == 200) {
@@ -151,7 +151,7 @@ class _HomeContentState extends State<HomeContent> {
   Future<void> fetchDeals() async {
     try {
       final response = await http.get(
-        Uri.parse('http://192.168.228.138:5000/api/deals'),
+        Uri.parse('http://172.16.217.138:5000/api/deals'),
       );
 
       if (response.statusCode == 200) {

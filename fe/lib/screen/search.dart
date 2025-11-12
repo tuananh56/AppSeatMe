@@ -24,8 +24,9 @@ class _SearchPageState extends State<SearchPage> {
 
     try {
       final response = await http.get(
+        
         Uri.parse(
-          'http://192.168.228.138:5000/api/branches/search?query=$query',
+          'http://172.16.217.138:5000/api/branches/search?query=$query',
         ),
       );
 

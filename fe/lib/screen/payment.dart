@@ -122,7 +122,7 @@ class _PaymentState extends State<Payment> with SingleTickerProviderStateMixin {
           ElevatedButton(
             onPressed: () async {
               final url = Uri.parse(
-                'http://192.168.228.138:5000/api/bookings/${widget.bookingId}/pay',
+                'http://172.16.217.138:5000/api/bookings/${widget.bookingId}/pay',
               );
               try {
                 final response = await http.post(url);

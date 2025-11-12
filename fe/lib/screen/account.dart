@@ -186,7 +186,7 @@ class _AccountPageState extends State<AccountPage> {
                       backgroundImage:
                           (_userImage != null && _userImage!.isNotEmpty)
                           ? NetworkImage(
-                              "http://192.168.228.138:5000$_userImage",
+                              "http://172.16.217.138:5000$_userImage",
                             )
                           : null,
                       child: (_userImage == null || _userImage!.isEmpty)

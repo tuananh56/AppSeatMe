@@ -58,7 +58,7 @@ class _ChatPageNewState extends State<ChatPage> {
 
   void _connectSocket() {
     socket = IO.io(
-      'http://192.168.228.138:5000',
+      'http://172.16.217.138:5000',
       OptionBuilder().setTransports(['websocket']).build(),
     );
 
@@ -89,7 +89,7 @@ class _ChatPageNewState extends State<ChatPage> {
     try {
       final userId = widget.user?['_id'];
       final res = await http.get(
-        Uri.parse('http://192.168.228.138:5000/api/chat/$userId/$adminId'),
+        Uri.parse('http://172.16.217.138:5000/api/chat/$userId/$adminId'),
       );
       if (res.statusCode == 200) {
         setState(() {
@@ -182,7 +182,7 @@ class _ChatPageNewState extends State<ChatPage> {
   @override
   Widget build(BuildContext context) {
     final userAvatar = widget.user?['imageUrl'] != null
-        ? "http://192.168.228.138:5000${widget.user?['imageUrl']}"
+        ? "http://172.16.217.138:5000${widget.user?['imageUrl']}"
         : "https://cdn-icons-png.flaticon.com/512/149/149071.png";
 
     return Scaffold(

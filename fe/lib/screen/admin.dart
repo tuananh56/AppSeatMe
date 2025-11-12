@@ -112,7 +112,7 @@ class _AdminPageState extends State<AdminPage> {
 
   Future<void> _updateXacNhan(String id, bool isConfirmed) async {
     final url = Uri.parse(
-      'http://192.168.228.138:5000/api/bookings/$id/${isConfirmed ? "confirm" : "cancel"}',
+      'http://172.16.217.138:5000/api/bookings/$id/${isConfirmed ? "confirm" : "cancel"}',
     );
 
     try {
@@ -138,7 +138,7 @@ class _AdminPageState extends State<AdminPage> {
   }
 
   Future<void> _fetchBookings() async {
-    final url = Uri.parse('http://192.168.228.138:5000/api/bookings');
+    final url = Uri.parse('http://172.16.217.138:5000/api/bookings');
     try {
       final response = await http.get(url);
       if (response.statusCode == 200) {
@@ -156,7 +156,7 @@ class _AdminPageState extends State<AdminPage> {
   }
 
   Future<void> _updateThanhToan(String id) async {
-    final url = Uri.parse('http://192.168.228.138:5000/api/bookings/$id/pay');
+    final url = Uri.parse('http://172.16.217.138:5000/api/bookings/$id/pay');
     try {
       final response = await http.post(url);
 

@@ -22,7 +22,7 @@ class _AdminPageState extends State<AdminPage> {
 
   Future<void> _fetchAllBookings() async {
     try {
-      final res = await http.get(Uri.parse('http://192.168.228.138:5000/api/bookings'));
+      final res = await http.get(Uri.parse('http://172.16.217.138:5000/api/bookings'));
       if (res.statusCode == 200) {
         setState(() {
           _allBookings = jsonDecode(res.body);
